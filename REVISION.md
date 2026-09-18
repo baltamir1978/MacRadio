@@ -19,6 +19,9 @@ Comprobado en este Mac:
 - Widget dibujado en los cuatro tamaños, claro y oscuro, en español e inglés (`--render-widgets`).
 - Shazam sobre Kiss FM con el App ID propio `Altamirano.MacRadio`, registrado con ShazamKit en
   App Services el 2026-09-19 (antes no existía: la app se firma con Developer ID sin perfil).
+- Comprobado a mano (2026-09-19): con Shazam, la letra sale a tiempo desde el cambio de canción
+  en La Indie y Cassette FM; los botones del widget arrancan la app cerrada en segundo plano; el
+  botón ▶︎/⏸ se ve en el escritorio sin foco; − / + y el clic en la letra funcionan en el widget.
 - El título ICY llega al reproductor en su punto exacto del audio (−0,008 s medido). El desfase
   de la letra que se nota viene de la emisora, que cambia el título tarde; lo mide Shazam por
   emisora (`title_lag.<stream>`) y, mientras tanto, se corrige a mano con − / + junto a «Letra».
@@ -26,11 +29,6 @@ Comprobado en este Mac:
 ## Pendiente
 
 ### Por verificar a mano
-- Con ShazamKit activado: que el retraso de título aprendido (traza `… changes its titles …s
-  late`) deja la letra a tiempo desde el cambio de canción, en La Indie y Cassette FM.
-- Los botones del widget en el escritorio con la app cerrada: el widget tiene que arrancarla en
-  segundo plano (`AppLauncher`). Si el sandbox de la extensión no lo permitiera, el síntoma sería
-  que el botón no hace nada hasta abrir la app.
 - Cuánto se aleja la letra del audio en el widget frente a la ventana: WidgetKit decide cuándo
   pinta cada entrada de la línea de tiempo y puede llegar tarde.
 - Cuña de La Indie cuando rota el anuncio: todos empiezan con la misma sintonía, así que el
