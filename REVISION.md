@@ -17,20 +17,19 @@ Comprobado en este Mac:
   primer sonido a unos 10 s. Cassette FM, sin cuña, no da falso positivo. El reencuadre ICY está
   probado con un stream sintético (corte exacto, títulos intactos, paso íntegro si no coincide).
 - Widget dibujado en los cuatro tamaños, claro y oscuro, en español e inglés (`--render-widgets`).
-- Shazam sobre Kiss FM **con el App ID de RadioApp** (ver pendiente).
+- Shazam sobre Kiss FM con el App ID propio `Altamirano.MacRadio`, registrado con ShazamKit en
+  App Services el 2026-09-19 (antes no existía: la app se firma con Developer ID sin perfil).
 - El título ICY llega al reproductor en su punto exacto del audio (−0,008 s medido). El desfase
   de la letra que se nota viene de la emisora, que cambia el título tarde; lo mide Shazam por
   emisora (`title_lag.<stream>`) y, mientras tanto, se corrige a mano con − / + junto a «Letra».
 
 ## Pendiente
 
-### Requiere acción en developer.apple.com
-- **Activar ShazamKit para el App ID `Altamirano.MacRadio`.** Sin eso, Shazam responde 401 /
-  error 202 y no hay identificación: Kiss FM se queda sin canción ni letra, y no se aprende el
-  retraso de título de cada emisora. La app lo detecta y lo avisa en Ajustes. Tras activarlo
-  basta con reabrir la app, sin recompilar.
-
 ### Por verificar a mano
+- Widget en el escritorio sin foco (modo vibrante) y con aspecto tintado o transparente: que el
+  botón ▶︎/⏸ se vea (icono sobre un disco tenue). `--render-widgets` no reproduce esos modos.
+- − / + y clic en una línea de la letra desde el widget grande: que la letra se mueva en el
+  widget y en la ventana, y que el ajuste se guarde para la emisora.
 - Con ShazamKit activado: que el retraso de título aprendido (traza `… changes its titles …s
   late`) deja la letra a tiempo desde el cambio de canción, en La Indie y Cassette FM.
 - Los botones del widget en el escritorio con la app cerrada: el widget tiene que arrancarla en

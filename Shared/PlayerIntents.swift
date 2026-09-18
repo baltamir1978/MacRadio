@@ -101,3 +101,46 @@ struct IdentifySongIntent: AudioPlaybackIntent {
         return .result()
     }
 }
+
+// MARK: - Lyrics timing
+
+struct NudgeLyricsIntent: AppIntent {
+    nonisolated static var title: LocalizedStringResource { "Ajustar la letra" }
+    nonisolated static var description: IntentDescription {
+        IntentDescription("Adelanta o retrasa la letra de la emisora que suena.")
+    }
+    /// Only for the widget's − / + buttons.
+    nonisolated static var isDiscoverable: Bool { false }
+
+    @Parameter(title: "Segundos") var seconds: Double
+
+    init() {}
+
+    init(seconds: Double) {
+        self.seconds = seconds
+    }
+
+    func perform() async throws -> some IntentResult {
+        await PlayerCommand.nudgeLyrics(seconds: seconds).dispatch()
+        return .result()
+    }
+}
+
+/// A click on a lyric line in the widget: that line is the one being sung.
+struct SyncLyricsIntent: AppIntent {
+    nonisolated static var title: LocalizedStringResource { "Sincronizar la letra" }
+    nonisolated static var isDiscoverable: Bool { false }
+
+    @Parameter(title: "Línea") var line: Int
+
+    init() {}
+
+    init(line: Int) {
+        self.line = line
+    }
+
+    func perform() async throws -> some IntentResult {
+        await PlayerCommand.syncLyrics(line: line, at: Date()).dispatch()
+        return .result()
+    }
+}

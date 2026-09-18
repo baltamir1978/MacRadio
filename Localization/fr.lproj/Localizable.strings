@@ -8,8 +8,10 @@
 "Abrir MacRadio" = "Ouvrir MacRadio";
 "Abrir al iniciar sesión" = "Ouvrir à l’ouverture de session";
 "Abrir en Apple Music" = "Ouvrir dans Apple Music";
+"Adelanta o retrasa la letra de la emisora que suena." = "Avance ou retarde les paroles de la station en cours.";
 "Adelantar la letra" = "Avancer les paroles";
 "Adelantar la letra medio segundo" = "Avancer les paroles d’une demi-seconde";
+"Ajustar la letra" = "Ajuster les paroles";
 "Ajuste de la letra para esta emisora. Doble clic para volver a cero." = "Décalage des paroles pour cette station. Double-cliquez pour remettre à zéro.";
 "Ajuste de la letra: %@" = "Décalage des paroles : %@";
 "Ajustes…" = "Réglages…";
@@ -79,6 +81,7 @@
 "Listo" = "Terminé";
 "Lo que suena, con carátula, y tus emisoras a un clic. En el tamaño grande, también la letra." = "Ce qui passe, avec sa pochette, et vos stations en un clic. En grand format, les paroles aussi.";
 "Logo (dirección de la imagen, opcional)" = "Logo (adresse de l’image, facultatif)";
+"Línea" = "Ligne";
 "MacRadio" = "MacRadio";
 "Marcar como favorita" = "Ajouter aux favoris";
 "Marcar la canción como favorita" = "Ajouter la chanson aux favoris";
@@ -111,12 +114,15 @@
 "Salir" = "Quitter";
 "Saltar la cuña de entrada" = "Sauter les pubs de connexion";
 "Se borran todas las canciones menos las favoritas." = "Toutes les chansons sont supprimées, sauf les favoris.";
+"Segundos" = "Secondes";
 "Selecciona una emisora en la barra lateral para empezar a escucharla." = "Sélectionnez une station dans la barre latérale pour l’écouter.";
 "Shazam no está disponible para MacRadio" = "Shazam n’est pas disponible pour MacRadio";
 "Sin datos de la canción" = "Aucune info sur la chanson";
 "Sin emisoras" = "Aucune station";
 "Sin favoritas" = "Aucun favori";
+"Sincroniza la letra con esta línea" = "Synchronise les paroles sur cette ligne";
 "Sincroniza la letra desde esta línea" = "Synchronise les paroles à partir de cette ligne";
+"Sincronizar la letra" = "Synchroniser les paroles";
 "Sonando" = "En lecture";
 "Subir volumen" = "Augmenter le volume";
 "Suena ahora: sincronizar desde esta línea" = "En cours : synchroniser à partir de cette ligne";

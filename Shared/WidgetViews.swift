@@ -266,14 +266,26 @@ private struct SongText: View {
 private struct PlayPauseButton: View {
     let isPlaying: Bool
     let size: CGFloat
+    @Environment(\.widgetRenderingMode) private var renderingMode
 
     var body: some View {
         Button(intent: TogglePlaybackIntent()) {
-            Image(systemName: isPlaying ? "pause.fill" : "play.fill")
+            let glyph = Image(systemName: isPlaying ? "pause.fill" : "play.fill")
                 .font(.system(size: size * 0.42, weight: .bold))
-                .foregroundStyle(Color.appBackground)
                 .frame(width: size, height: size)
-                .background(Circle().fill(Color.brand))
+            if renderingMode == .fullColor {
+                glyph
+                    .foregroundStyle(Color.appBackground)
+                    .background(Circle().fill(Color.brand))
+            } else {
+                // On the desktop out of focus (vibrant) or with a tinted or clear appearance
+                // (accented), the system recolours everything alike: a glyph drawn on a filled
+                // circle comes out white on white. A faint disc keeps the button's shape.
+                glyph
+                    .foregroundStyle(.primary)
+                    .background(Circle().fill(.primary.opacity(0.18)))
+                    .widgetAccentable()
+            }
         }
         .buttonStyle(.plain)
         .accessibilityLabel(isPlaying ? Text("Pausar") : Text("Reproducir"))
@@ -420,12 +432,23 @@ struct LyricsBlock: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 5) {
-            Label("Letra", systemImage: "quote.bubble")
-                .font(.system(size: 10, weight: .semibold))
-                .foregroundStyle(Color.brand)
-                .textCase(.uppercase)
+            HStack(spacing: 0) {
+                Label("Letra", systemImage: "quote.bubble")
+                    .font(.system(size: 10, weight: .semibold))
+                    .foregroundStyle(Color.brand)
+                    .textCase(.uppercase)
+                Spacer(minLength: 8)
+                if let snapshot = entry.snapshot, isFollowing(snapshot) {
+                    LyricsAdjuster(offset: snapshot.lyricsOffset ?? 0)
+                }
+            }
             content
         }
+    }
+
+    /// Whether the lyrics run on the song's clock, so moving them makes sense (as in the app).
+    private func isFollowing(_ snapshot: NowPlayingSnapshot) -> Bool {
+        snapshot.hasSong && snapshot.songStartIsExact && !(snapshot.lyrics?.synced.isEmpty ?? true)
     }
 
     @ViewBuilder
@@ -462,12 +485,50 @@ struct LyricsBlock: View {
             ForEach(Array(window), id: \.offset) { index, text in
                 let isCurrent = index == current
                 let isPast = current.map { index < $0 } ?? false
-                Text(text.isEmpty ? "♪" : text)
+                let line = Text(text.isEmpty ? "♪" : text)
                     .font(.system(size: isCurrent ? 14 : 13, weight: isCurrent ? .semibold : .regular))
                     .foregroundStyle(isCurrent ? AnyShapeStyle(Color.primary)
                                      : isPast ? AnyShapeStyle(.tertiary) : AnyShapeStyle(.secondary))
                     .lineLimit(isCurrent ? 2 : 1)
+                if lyrics.synced.isEmpty {
+                    line
+                } else {
+                    // As in the app: clicking the line being sung puts the lyrics in step.
+                    Button(intent: SyncLyricsIntent(line: index)) { line }
+                        .buttonStyle(.plain)
+                        .accessibilityHint(Text("Sincroniza la letra con esta línea"))
+                }
             }
         }
+    }
+}
+
+/// − / + for the lyrics of this station, half a second at a time, as next to «Letra» in the app.
+private struct LyricsAdjuster: View {
+    let offset: Double
+
+    var body: some View {
+        HStack(spacing: 8) {
+            Button(intent: NudgeLyricsIntent(seconds: -0.5)) {
+                Image(systemName: "minus").frame(width: 18, height: 16).contentShape(Rectangle())
+            }
+            .accessibilityLabel(Text("Retrasar la letra"))
+            Text(offsetText)
+                .monospacedDigit()
+                .foregroundStyle(.secondary)
+                .accessibilityLabel(Text("Ajuste de la letra: \(offsetText)"))
+            Button(intent: NudgeLyricsIntent(seconds: 0.5)) {
+                Image(systemName: "plus").frame(width: 18, height: 16).contentShape(Rectangle())
+            }
+            .accessibilityLabel(Text("Adelantar la letra"))
+        }
+        .buttonStyle(.plain)
+        .font(.system(size: 11, weight: .semibold))
+        .foregroundStyle(Color.brand)
+    }
+
+    private var offsetText: String {
+        offset == 0 ? "±0 s"
+            : offset.formatted(.number.precision(.fractionLength(1)).sign(strategy: .always())) + " s"
     }
 }

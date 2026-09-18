@@ -18,6 +18,8 @@ python3 Tools/translations.py check >/dev/null || { echo "Hay cadenas sin traduc
 python3 Tools/translations.py >/dev/null
 
 echo "Compilando…"
+# Sin la copia anterior, un fallo de compilación no pasa por bueno ni se instala.
+rm -rf "$APP"
 xcodebuild -project MacRadio.xcodeproj -scheme MacRadio -configuration Release \
     -derivedDataPath build/dd build 2>&1 | grep -E "error:|warning:|BUILD" || true
 [[ -d "$APP" ]] || { echo "La compilación ha fallado."; exit 1; }
@@ -34,6 +36,9 @@ if [[ "${1:-}" == "--install" ]]; then
         "$LSREGISTER" -u "$copy" 2>/dev/null || true
     done
     "$LSREGISTER" -f /Applications/MacRadio.app
+    # La extensión del widget sigue corriendo con el binario viejo hasta que alguien la para; al
+    # pararla, el sistema la vuelve a lanzar ya con el nuevo.
+    pkill -f "MacRadio.app/Contents/PlugIns/MacRadioWidget.appex" 2>/dev/null || true
     open /Applications/MacRadio.app
     echo "✓ Instalada en /Applications"
 fi

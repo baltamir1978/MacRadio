@@ -182,6 +182,9 @@ nonisolated struct NowPlayingSnapshot: Codable, Sendable, Equatable {
     var isFavorite: Bool
     /// ShazamKit is listening to find out what's playing.
     var isIdentifying: Bool
+    /// The user's lyrics adjustment for this station, in seconds (already in `songStartedAt`;
+    /// here only to be shown). Optional so snapshots written by an older build still decode.
+    var lyricsOffset: Double? = nil
 
     var hasSong: Bool { !(track ?? "").isEmpty }
 }

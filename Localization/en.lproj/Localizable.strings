@@ -8,8 +8,10 @@
 "Abrir MacRadio" = "Open MacRadio";
 "Abrir al iniciar sesión" = "Open at login";
 "Abrir en Apple Music" = "Open in Apple Music";
+"Adelanta o retrasa la letra de la emisora que suena." = "Moves the lyrics of the station playing earlier or later.";
 "Adelantar la letra" = "Move Lyrics Earlier";
 "Adelantar la letra medio segundo" = "Move the lyrics half a second earlier";
+"Ajustar la letra" = "Adjust Lyrics";
 "Ajuste de la letra para esta emisora. Doble clic para volver a cero." = "Lyrics timing for this station. Double-click to reset.";
 "Ajuste de la letra: %@" = "Lyrics timing: %@";
 "Ajustes…" = "Settings…";
@@ -79,6 +81,7 @@
 "Listo" = "Done";
 "Lo que suena, con carátula, y tus emisoras a un clic. En el tamaño grande, también la letra." = "What’s playing, with its cover, and your stations one click away. The large size adds the lyrics.";
 "Logo (dirección de la imagen, opcional)" = "Logo (image address, optional)";
+"Línea" = "Line";
 "MacRadio" = "MacRadio";
 "Marcar como favorita" = "Mark as Favourite";
 "Marcar la canción como favorita" = "Mark Song as Favourite";
@@ -111,12 +114,15 @@
 "Salir" = "Quit";
 "Saltar la cuña de entrada" = "Skip connection ads";
 "Se borran todas las canciones menos las favoritas." = "Every song except your favourites is deleted.";
+"Segundos" = "Seconds";
 "Selecciona una emisora en la barra lateral para empezar a escucharla." = "Select a station in the sidebar to start listening.";
 "Shazam no está disponible para MacRadio" = "Shazam isn’t available to MacRadio";
 "Sin datos de la canción" = "No song information";
 "Sin emisoras" = "No Stations";
 "Sin favoritas" = "No Favourites";
+"Sincroniza la letra con esta línea" = "Syncs the lyrics to this line";
 "Sincroniza la letra desde esta línea" = "Syncs the lyrics from this line";
+"Sincronizar la letra" = "Sync Lyrics";
 "Sonando" = "Playing";
 "Subir volumen" = "Volume Up";
 "Suena ahora: sincronizar desde esta línea" = "Playing now: sync from this line";

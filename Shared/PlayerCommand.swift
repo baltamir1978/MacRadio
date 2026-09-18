@@ -10,6 +10,16 @@ nonisolated enum PlayerCommand: Codable, Sendable, Equatable {
     case previous
     case toggleFavorite
     case identify
+    /// Lyrics earlier (positive) or later (negative) for the current station.
+    case nudgeLyrics(seconds: Double)
+    /// The user clicked lyric line `line` as it was being sung, at `at`. The time travels with
+    /// the command: the app may take a moment to receive it, or even to launch.
+    case syncLyrics(line: Int, at: Date)
+}
+
+extension PlayerCommand {
+    /// A click on the line being sung comes this long after the line is heard.
+    static let clickReaction: TimeInterval = 0.3
 }
 
 // MARK: - Delivery
@@ -126,6 +136,19 @@ extension SharedStore {
             if snapshot?.hasSong == true { snapshot?.isFavorite.toggle() }
         case .identify:
             if snapshot?.isPlaying == true { snapshot?.isIdentifying = true }
+        case .nudgeLyrics(let seconds):
+            // The snapshot carries the lyrics' clock, offset already applied: earlier lyrics
+            // mean an earlier start. The app clamps the offset; close enough until it answers.
+            if var s = snapshot, let start = s.songStartedAt, s.songStartIsExact {
+                s.songStartedAt = start.addingTimeInterval(-seconds)
+                s.lyricsOffset = (s.lyricsOffset ?? 0) + seconds
+                snapshot = s
+            }
+        case .syncLyrics(let line, let date):
+            if let lines = snapshot?.lyrics?.synced, lines.indices.contains(line) {
+                snapshot?.songStartedAt = date.addingTimeInterval(-lines[line].time - PlayerCommand.clickReaction)
+                snapshot?.songStartIsExact = true
+            }
         }
 
         // Written without asking WidgetKit to reload: finishing the intent already does that.

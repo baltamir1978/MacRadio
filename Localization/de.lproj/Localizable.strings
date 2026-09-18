@@ -8,8 +8,10 @@
 "Abrir MacRadio" = "MacRadio öffnen";
 "Abrir al iniciar sesión" = "Beim Anmelden öffnen";
 "Abrir en Apple Music" = "In Apple Music öffnen";
+"Adelanta o retrasa la letra de la emisora que suena." = "Verschiebt den Songtext des laufenden Senders nach vorn oder hinten.";
 "Adelantar la letra" = "Songtext früher";
 "Adelantar la letra medio segundo" = "Songtext eine halbe Sekunde früher";
+"Ajustar la letra" = "Songtext anpassen";
 "Ajuste de la letra para esta emisora. Doble clic para volver a cero." = "Textversatz für diesen Sender. Doppelklick setzt ihn zurück.";
 "Ajuste de la letra: %@" = "Textversatz: %@";
 "Ajustes…" = "Einstellungen …";
@@ -79,6 +81,7 @@
 "Listo" = "Fertig";
 "Lo que suena, con carátula, y tus emisoras a un clic. En el tamaño grande, también la letra." = "Was gerade läuft, mit Cover, und deine Sender mit einem Klick. In groß auch der Songtext.";
 "Logo (dirección de la imagen, opcional)" = "Logo (Bildadresse, optional)";
+"Línea" = "Zeile";
 "MacRadio" = "MacRadio";
 "Marcar como favorita" = "Als Favorit markieren";
 "Marcar la canción como favorita" = "Song als Favorit markieren";
@@ -111,12 +114,15 @@
 "Salir" = "Beenden";
 "Saltar la cuña de entrada" = "Werbung beim Einschalten überspringen";
 "Se borran todas las canciones menos las favoritas." = "Alle Songs außer den Favoriten werden gelöscht.";
+"Segundos" = "Sekunden";
 "Selecciona una emisora en la barra lateral para empezar a escucharla." = "Wähle in der Seitenleiste einen Sender, um ihn zu hören.";
 "Shazam no está disponible para MacRadio" = "Shazam ist für MacRadio nicht verfügbar";
 "Sin datos de la canción" = "Keine Songinfos";
 "Sin emisoras" = "Keine Sender";
 "Sin favoritas" = "Keine Favoriten";
+"Sincroniza la letra con esta línea" = "Synchronisiert den Songtext mit dieser Zeile";
 "Sincroniza la letra desde esta línea" = "Synchronisiert den Text ab dieser Zeile";
+"Sincronizar la letra" = "Songtext synchronisieren";
 "Sonando" = "Läuft";
 "Subir volumen" = "Lauter";
 "Suena ahora: sincronizar desde esta línea" = "Läuft gerade: ab dieser Zeile synchronisieren";

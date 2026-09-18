@@ -8,8 +8,10 @@
 "Abrir MacRadio" = "Abrir o MacRadio";
 "Abrir al iniciar sesión" = "Abrir ao iniciar sessão";
 "Abrir en Apple Music" = "Abrir no Apple Music";
+"Adelanta o retrasa la letra de la emisora que suena." = "Adianta ou atrasa a letra da estação que está a tocar.";
 "Adelantar la letra" = "Adiantar a letra";
 "Adelantar la letra medio segundo" = "Adiantar a letra meio segundo";
+"Ajustar la letra" = "Ajustar a letra";
 "Ajuste de la letra para esta emisora. Doble clic para volver a cero." = "Acerto da letra para esta estação. Duplo clique para repor.";
 "Ajuste de la letra: %@" = "Acerto da letra: %@";
 "Ajustes…" = "Definições…";
@@ -79,6 +81,7 @@
 "Listo" = "OK";
 "Lo que suena, con carátula, y tus emisoras a un clic. En el tamaño grande, también la letra." = "O que está a tocar, com a capa, e as suas estações a um clique. No tamanho grande, também a letra.";
 "Logo (dirección de la imagen, opcional)" = "Logótipo (endereço da imagem, opcional)";
+"Línea" = "Linha";
 "MacRadio" = "MacRadio";
 "Marcar como favorita" = "Marcar como favorita";
 "Marcar la canción como favorita" = "Marcar a canção como favorita";
@@ -111,12 +114,15 @@
 "Salir" = "Sair";
 "Saltar la cuña de entrada" = "Saltar os anúncios de entrada";
 "Se borran todas las canciones menos las favoritas." = "São apagadas todas as canções exceto as favoritas.";
+"Segundos" = "Segundos";
 "Selecciona una emisora en la barra lateral para empezar a escucharla." = "Selecione uma estação na barra lateral para começar a ouvir.";
 "Shazam no está disponible para MacRadio" = "O Shazam não está disponível para o MacRadio";
 "Sin datos de la canción" = "Sem dados da canção";
 "Sin emisoras" = "Sem estações";
 "Sin favoritas" = "Sem favoritas";
+"Sincroniza la letra con esta línea" = "Sincroniza a letra com esta linha";
 "Sincroniza la letra desde esta línea" = "Sincroniza a letra a partir desta linha";
+"Sincronizar la letra" = "Sincronizar a letra";
 "Sonando" = "A tocar";
 "Subir volumen" = "Aumentar volume";
 "Suena ahora: sincronizar desde esta línea" = "A tocar agora: sincronizar a partir desta linha";
