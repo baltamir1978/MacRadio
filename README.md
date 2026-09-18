@@ -4,7 +4,7 @@ Radio por internet para macOS, hermana de [RadioApp](https://github.com/baltamir
 iOS: tus emisoras con carátula, **letra sincronizada**, historial con favoritas y un **widget de
 escritorio** desde el que elegir emisora y ver lo que suena.
 
-**Versión: 1.0** · macOS 26 o posterior · Swift 6
+**Versión: 1.0** · macOS 26 o posterior · Swift 6 · Estado y pendientes en [REVISION.md](REVISION.md)
 
 ## Características
 
