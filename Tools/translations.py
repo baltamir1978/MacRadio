@@ -62,7 +62,6 @@ T = {
     "Escúchala sin añadirla": ("Listen without adding it", "L’écouter sans l’ajouter", "Anhören, ohne hinzuzufügen", "Ouvir sem adicionar"),
     "Guardar": ("Save", "Enregistrer", "Sichern", "Guardar"),
     "Género (opcional)": ("Genre (optional)", "Genre (facultatif)", "Genre (optional)", "Género (opcional)"),
-    "Has sintonizado a mitad de canción: la letra irá sincronizada desde la siguiente.": ("You tuned in mid-song: the lyrics will follow along from the next one.", "Vous avez pris la chanson en cours : les paroles seront synchronisées dès la suivante.", "Du hast mitten im Song eingeschaltet: Ab dem nächsten läuft der Text synchron mit.", "Sintonizou a meio da canção: a letra acompanha a partir da próxima."),
     "Haz clic con el botón derecho en el escritorio, elige «Editar widgets…» y busca MacRadio. Para elegir sus emisoras, haz clic con el botón derecho sobre el widget y elige «Editar “MacRadio”».": (
         "Right-click the desktop, choose “Edit Widgets…” and search for MacRadio. To pick its stations, right-click the widget and choose “Edit “MacRadio””.",
         "Faites un clic droit sur le bureau, choisissez « Modifier les widgets… » et cherchez MacRadio. Pour choisir ses stations, faites un clic droit sur le widget et choisissez « Modifier “MacRadio” ».",
@@ -149,6 +148,11 @@ T = {
     "Vaciar historial…": ("Clear History…", "Vider l’historique…", "Verlauf leeren …", "Limpar histórico…"),
     "¿Vaciar el historial?": ("Clear the history?", "Vider l’historique ?", "Verlauf leeren?", "Limpar o histórico?"),
     "Volver a guardar": ("Save Again", "Enregistrer à nouveau", "Wieder speichern", "Voltar a guardar"),
+    "Sincroniza la letra desde esta línea": ("Syncs the lyrics from this line", "Synchronise les paroles à partir de cette ligne", "Synchronisiert den Text ab dieser Zeile", "Sincroniza a letra a partir desta linha"),
+    "Suena ahora: sincronizar desde esta línea": ("Playing now: sync from this line", "En cours : synchroniser à partir de cette ligne", "Läuft gerade: ab dieser Zeile synchronisieren", "A tocar agora: sincronizar a partir desta linha"),
+    "¿Va desfasada? Haz clic en la línea que está sonando.": ("Out of step? Click the line that’s being sung.", "Décalé ? Cliquez sur la ligne en train d’être chantée.", "Nicht im Takt? Klicke auf die Zeile, die gerade gesungen wird.", "Está desfasada? Clique na linha que está a tocar."),
+    "No se sabe por dónde va la canción: haz clic en la línea que está sonando y la letra seguirá desde ahí.": ("It isn’t known how far into the song we are: click the line being sung and the lyrics will follow from there.", "On ne sait pas où en est la chanson : cliquez sur la ligne chantée et les paroles suivront à partir de là.", "Unklar, wo der Song gerade ist: Klicke auf die gesungene Zeile, und der Text läuft ab dort mit.", "Não se sabe em que ponto vai a canção: clique na linha que está a tocar e a letra acompanha a partir daí."),
+    "Esta letra no trae tiempos, así que no puede seguir la canción.": ("These lyrics have no timings, so they can’t follow the song.", "Ces paroles n’ont pas de minutage : elles ne peuvent pas suivre la chanson.", "Dieser Text hat keine Zeitmarken und kann dem Song nicht folgen.", "Esta letra não traz tempos, por isso não pode acompanhar a canção."),
 }
 LANGS = ["en", "fr", "de", "pt"]
 # Literals the scan picks up that never reach the screen through a localized API.
@@ -156,7 +160,7 @@ NOT_UI = {"ES", "±0 s"}
 
 
 def code_keys():
-    pat = re.compile(r'(?<![\w.])(?:Text|Button|Label|Section|Toggle|TextField|Picker|Link|CommandMenu|ContentUnavailableView|ProgressView|help|note|configurationDisplayName|description|IntentDescription|TypeDisplayRepresentation\(name:|Parameter\(title:|localized:|accessibilityLabel|LocalizedStringKey|return|Window)\s*\(?\s*"((?:[^"\\\n]|\\.)*)"')
+    pat = re.compile(r'(?<![\w.])(?:Text|Button|Label|Section|Toggle|TextField|Picker|Link|CommandMenu|ContentUnavailableView|ProgressView|help|note|hint|configurationDisplayName|description|IntentDescription|TypeDisplayRepresentation\(name:|Parameter\(title:|localized:|accessibilityLabel|LocalizedStringKey|return|Window)\s*\(?\s*"((?:[^"\\\n]|\\.)*)"')
     keys = set()
     for f in glob.glob(os.path.join(ROOT, "*", "*.swift")):
         if "/Tools/" in f:

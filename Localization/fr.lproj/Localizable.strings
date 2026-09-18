@@ -59,11 +59,11 @@
 "Escuchar %@" = "Écouter %@";
 "Escuchar emisora" = "Écouter une station";
 "Escúchala sin añadirla" = "L’écouter sans l’ajouter";
+"Esta letra no trae tiempos, así que no puede seguir la canción." = "Ces paroles n’ont pas de minutage : elles ne peuvent pas suivre la chanson.";
 "Favoritas" = "Favoris";
 "Guarda la canción que suena entre tus favoritas de MacRadio, o la quita." = "Ajoute la chanson en cours à vos favoris MacRadio, ou l’en retire.";
 "Guardar" = "Enregistrer";
 "Género (opcional)" = "Genre (facultatif)";
-"Has sintonizado a mitad de canción: la letra irá sincronizada desde la siguiente." = "Vous avez pris la chanson en cours : les paroles seront synchronisées dès la suivante.";
 "Haz clic con el botón derecho en el escritorio, elige «Editar widgets…» y busca MacRadio. Para elegir sus emisoras, haz clic con el botón derecho sobre el widget y elige «Editar “MacRadio”»." = "Faites un clic droit sur le bureau, choisissez « Modifier les widgets… » et cherchez MacRadio. Pour choisir ses stations, faites un clic droit sur le widget et choisissez « Modifier “MacRadio” ».";
 "Historial" = "Historique";
 "Historial de canciones (⌘Y)" = "Historique des chansons (⌘Y)";
@@ -92,6 +92,7 @@
 "No hay letra para esta canción." = "Pas de paroles pour cette chanson.";
 "No se ha reconocido la canción" = "Chanson non reconnue";
 "No se pudo buscar" = "Recherche impossible";
+"No se sabe por dónde va la canción: haz clic en la línea que está sonando y la letra seguirá desde ahí." = "On ne sait pas où en est la chanson : cliquez sur la ligne chantée et les paroles suivront à partir de là.";
 "No volver a guardar este título en %@" = "Ne plus enregistrer ce titre sur %@";
 "Nombre" = "Nom";
 "Nombre de la emisora" = "Nom de la station";
@@ -115,8 +116,10 @@
 "Sin datos de la canción" = "Aucune info sur la chanson";
 "Sin emisoras" = "Aucune station";
 "Sin favoritas" = "Aucun favori";
+"Sincroniza la letra desde esta línea" = "Synchronise les paroles à partir de cette ligne";
 "Sonando" = "En lecture";
 "Subir volumen" = "Augmenter le volume";
+"Suena ahora: sincronizar desde esta línea" = "En cours : synchroniser à partir de cette ligne";
 "Tiene que ser una dirección http o https." = "Il doit s’agir d’une adresse http ou https.";
 "Todas" = "Toutes";
 "Títulos ignorados" = "Titres ignorés";
@@ -130,4 +133,5 @@
 "Ya tienes una emisora con esta dirección." = "Vous avez déjà une station avec cette adresse.";
 "línea a línea, a su ritmo" = "ligne après ligne, en rythme";
 "que suena en la radio," = "qui passe à la radio,";
+"¿Va desfasada? Haz clic en la línea que está sonando." = "Décalé ? Cliquez sur la ligne en train d’être chantée.";
 "¿Vaciar el historial?" = "Vider l’historique ?";

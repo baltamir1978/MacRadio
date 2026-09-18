@@ -59,11 +59,11 @@
 "Escuchar %@" = "Listen to %@";
 "Escuchar emisora" = "Play Station";
 "Escúchala sin añadirla" = "Listen without adding it";
+"Esta letra no trae tiempos, así que no puede seguir la canción." = "These lyrics have no timings, so they can’t follow the song.";
 "Favoritas" = "Favourites";
 "Guarda la canción que suena entre tus favoritas de MacRadio, o la quita." = "Adds the song that’s playing to your MacRadio favourites, or removes it.";
 "Guardar" = "Save";
 "Género (opcional)" = "Genre (optional)";
-"Has sintonizado a mitad de canción: la letra irá sincronizada desde la siguiente." = "You tuned in mid-song: the lyrics will follow along from the next one.";
 "Haz clic con el botón derecho en el escritorio, elige «Editar widgets…» y busca MacRadio. Para elegir sus emisoras, haz clic con el botón derecho sobre el widget y elige «Editar “MacRadio”»." = "Right-click the desktop, choose “Edit Widgets…” and search for MacRadio. To pick its stations, right-click the widget and choose “Edit “MacRadio””.";
 "Historial" = "History";
 "Historial de canciones (⌘Y)" = "Song History (⌘Y)";
@@ -92,6 +92,7 @@
 "No hay letra para esta canción." = "No lyrics for this song.";
 "No se ha reconocido la canción" = "The song wasn’t recognised";
 "No se pudo buscar" = "Couldn’t Search";
+"No se sabe por dónde va la canción: haz clic en la línea que está sonando y la letra seguirá desde ahí." = "It isn’t known how far into the song we are: click the line being sung and the lyrics will follow from there.";
 "No volver a guardar este título en %@" = "Never Save This Title on %@ Again";
 "Nombre" = "Name";
 "Nombre de la emisora" = "Station name";
@@ -115,8 +116,10 @@
 "Sin datos de la canción" = "No song information";
 "Sin emisoras" = "No Stations";
 "Sin favoritas" = "No Favourites";
+"Sincroniza la letra desde esta línea" = "Syncs the lyrics from this line";
 "Sonando" = "Playing";
 "Subir volumen" = "Volume Up";
+"Suena ahora: sincronizar desde esta línea" = "Playing now: sync from this line";
 "Tiene que ser una dirección http o https." = "It has to be an http or https address.";
 "Todas" = "All";
 "Títulos ignorados" = "Ignored Titles";
@@ -130,4 +133,5 @@
 "Ya tienes una emisora con esta dirección." = "You already have a station with this address.";
 "línea a línea, a su ritmo" = "line by line, in time";
 "que suena en la radio," = "playing on the radio,";
+"¿Va desfasada? Haz clic en la línea que está sonando." = "Out of step? Click the line that’s being sung.";
 "¿Vaciar el historial?" = "Clear the history?";

@@ -70,6 +70,31 @@ final class RadioPlayer: NSObject, ObservableObject {
         publishState()
     }
 
+    /// Whether the lyrics can follow the song right now (and so be adjusted).
+    var lyricsAreSynced: Bool {
+        songStartIsExact && !(lyrics?.synced.isEmpty ?? true)
+    }
+
+    /// The user clicked the line being sung right now: the lyrics carry on from there.
+    ///
+    /// With the song's start already known, the correction is the station's — it changes titles
+    /// late — so it goes into the station's offset and the next songs start right too. Tuned in
+    /// mid-song, it's the missing start itself.
+    func syncLyrics(toLine index: Int) {
+        guard let station = currentStation, let lines = lyrics?.synced, lines.indices.contains(index) else { return }
+        // The click comes a moment after the line is heard.
+        let reaction = 0.3
+        let wanted = Date().addingTimeInterval(-lines[index].time - reaction)
+        if songStartIsExact, let start = songStartedAt {
+            lyricsOffset = min(15, max(-15, start.timeIntervalSince(wanted) - Self.lyricsLead))
+            UserDefaults.standard.set(lyricsOffset, forKey: "lyrics_offset." + station.streamURL)
+        } else {
+            songStartedAt = wanted.addingTimeInterval(Self.lyricsLead + lyricsOffset)
+            songStartIsExact = true
+        }
+        publishState()
+    }
+
     func resetLyricsOffset() {
         guard let station = currentStation else { return }
         lyricsOffset = 0

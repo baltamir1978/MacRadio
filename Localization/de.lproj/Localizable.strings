@@ -59,11 +59,11 @@
 "Escuchar %@" = "%@ hören";
 "Escuchar emisora" = "Sender abspielen";
 "Escúchala sin añadirla" = "Anhören, ohne hinzuzufügen";
+"Esta letra no trae tiempos, así que no puede seguir la canción." = "Dieser Text hat keine Zeitmarken und kann dem Song nicht folgen.";
 "Favoritas" = "Favoriten";
 "Guarda la canción que suena entre tus favoritas de MacRadio, o la quita." = "Fügt den laufenden Song deinen MacRadio-Favoriten hinzu oder entfernt ihn.";
 "Guardar" = "Sichern";
 "Género (opcional)" = "Genre (optional)";
-"Has sintonizado a mitad de canción: la letra irá sincronizada desde la siguiente." = "Du hast mitten im Song eingeschaltet: Ab dem nächsten läuft der Text synchron mit.";
 "Haz clic con el botón derecho en el escritorio, elige «Editar widgets…» y busca MacRadio. Para elegir sus emisoras, haz clic con el botón derecho sobre el widget y elige «Editar “MacRadio”»." = "Klicke mit der rechten Maustaste auf den Schreibtisch, wähle „Widgets bearbeiten …“ und suche nach MacRadio. Um die Sender auszuwählen, klicke mit der rechten Maustaste auf das Widget und wähle „„MacRadio“ bearbeiten“.";
 "Historial" = "Verlauf";
 "Historial de canciones (⌘Y)" = "Songverlauf (⌘Y)";
@@ -92,6 +92,7 @@
 "No hay letra para esta canción." = "Für diesen Song gibt es keinen Text.";
 "No se ha reconocido la canción" = "Song nicht erkannt";
 "No se pudo buscar" = "Suche nicht möglich";
+"No se sabe por dónde va la canción: haz clic en la línea que está sonando y la letra seguirá desde ahí." = "Unklar, wo der Song gerade ist: Klicke auf die gesungene Zeile, und der Text läuft ab dort mit.";
 "No volver a guardar este título en %@" = "Diesen Titel bei %@ nicht mehr speichern";
 "Nombre" = "Name";
 "Nombre de la emisora" = "Sendername";
@@ -115,8 +116,10 @@
 "Sin datos de la canción" = "Keine Songinfos";
 "Sin emisoras" = "Keine Sender";
 "Sin favoritas" = "Keine Favoriten";
+"Sincroniza la letra desde esta línea" = "Synchronisiert den Text ab dieser Zeile";
 "Sonando" = "Läuft";
 "Subir volumen" = "Lauter";
+"Suena ahora: sincronizar desde esta línea" = "Läuft gerade: ab dieser Zeile synchronisieren";
 "Tiene que ser una dirección http o https." = "Es muss eine http- oder https-Adresse sein.";
 "Todas" = "Alle";
 "Títulos ignorados" = "Ignorierte Titel";
@@ -130,4 +133,5 @@
 "Ya tienes una emisora con esta dirección." = "Du hast bereits einen Sender mit dieser Adresse.";
 "línea a línea, a su ritmo" = "Zeile für Zeile, im Takt";
 "que suena en la radio," = "der im Radio läuft,";
+"¿Va desfasada? Haz clic en la línea que está sonando." = "Nicht im Takt? Klicke auf die Zeile, die gerade gesungen wird.";
 "¿Vaciar el historial?" = "Verlauf leeren?";

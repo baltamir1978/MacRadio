@@ -14,7 +14,7 @@
             buildForAnalyzing = "YES">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "8D02CFB1701913804157084F"
+               BlueprintIdentifier = "0599D8CB0B368C699A57196A"
                BuildableName = "MacRadio.app"
                BlueprintName = "MacRadio"
                ReferencedContainer = "container:MacRadio.xcodeproj">
@@ -30,7 +30,7 @@
       <MacroExpansion>
          <BuildableReference
             BuildableIdentifier = "primary"
-            BlueprintIdentifier = "8D02CFB1701913804157084F"
+            BlueprintIdentifier = "0599D8CB0B368C699A57196A"
             BuildableName = "MacRadio.app"
             BlueprintName = "MacRadio"
             ReferencedContainer = "container:MacRadio.xcodeproj">
@@ -53,7 +53,7 @@
          runnableDebuggingMode = "0">
          <BuildableReference
             BuildableIdentifier = "primary"
-            BlueprintIdentifier = "8D02CFB1701913804157084F"
+            BlueprintIdentifier = "0599D8CB0B368C699A57196A"
             BuildableName = "MacRadio.app"
             BlueprintName = "MacRadio"
             ReferencedContainer = "container:MacRadio.xcodeproj">
@@ -70,7 +70,7 @@
          runnableDebuggingMode = "0">
          <BuildableReference
             BuildableIdentifier = "primary"
-            BlueprintIdentifier = "8D02CFB1701913804157084F"
+            BlueprintIdentifier = "0599D8CB0B368C699A57196A"
             BuildableName = "MacRadio.app"
             BlueprintName = "MacRadio"
             ReferencedContainer = "container:MacRadio.xcodeproj">

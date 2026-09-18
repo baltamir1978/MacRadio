@@ -95,8 +95,15 @@ el momento y actualiza el retraso de la emisora (`title_lag.<stream>`, promediad
 desde el cambio de título en las canciones siguientes.
 
 Si no hay ninguna fuente fiable, la letra se muestra entera y sin resaltar. Encima de todo, la
-letra se adelanta 1 s (se lee justo antes de cantarse) y hay un ajuste manual por emisora en
-pasos de 0,5 s, junto al título «Letra», que también se aplica al widget.
+letra se adelanta 1 s (se lee justo antes de cantarse). Y siempre se puede ajustar a mano:
+
+- **Clic en la línea que está sonando**: la letra sigue desde ahí. Si ya se sabía el inicio de
+  la canción, la corrección se guarda como ajuste de la emisora y vale para las siguientes; si se
+  había sintonizado a mitad, fija el inicio que faltaba.
+- **− / +** junto a «Letra», o **⌥⌘→ / ⌥⌘←** en el menú Controles: medio segundo cada vez.
+  Doble clic en el valor lo pone a cero. Se aplica también al widget.
+
+Una letra de LRCLIB sin marcas de tiempo no puede seguir la canción; la ventana lo dice.
 
 > Se probó a sacar el inicio del *now-playing* de AzuraCast más un retraso medido y guardado por
 > emisora. No sirve: el retraso cambia en cada conexión (con cuña, sin ella, según el búfer) y la

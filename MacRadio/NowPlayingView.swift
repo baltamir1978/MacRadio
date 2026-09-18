@@ -197,7 +197,7 @@ private struct LyricsPanel: View {
                     .font(.headline)
                     .foregroundStyle(Color.brand)
                 Spacer()
-                if isSynced { SyncAdjuster() }
+                if player.lyricsAreSynced { SyncAdjuster() }
             }
             content
         }
@@ -210,16 +210,17 @@ private struct LyricsPanel: View {
             note("La letra aparece cuando la emisora dice qué canción suena.")
         } else if let lyrics = player.lyrics, lyrics.isInstrumental {
             note("Instrumental ♪")
+        } else if let lyrics = player.lyrics, !lyrics.synced.isEmpty {
+            VStack(alignment: .leading, spacing: 6) {
+                hint(player.songStartIsExact
+                     ? "¿Va desfasada? Haz clic en la línea que está sonando."
+                     : "No se sabe por dónde va la canción: haz clic en la línea que está sonando y la letra seguirá desde ahí.")
+                SyncedLyrics(lyrics: lyrics, start: player.songStartIsExact ? player.lyricsStart : nil,
+                             reduceMotion: reduceMotion) { player.syncLyrics(toLine: $0) }
+            }
         } else if let lyrics = player.lyrics, !lyrics.isEmpty {
-            if !lyrics.synced.isEmpty, player.songStartIsExact, let start = player.lyricsStart {
-                SyncedLyrics(lyrics: lyrics, start: start, reduceMotion: reduceMotion)
-            } else {
-                VStack(alignment: .leading, spacing: 8) {
-                    if !lyrics.synced.isEmpty {
-                        Text("Has sintonizado a mitad de canción: la letra irá sincronizada desde la siguiente.")
-                            .font(.callout)
-                            .foregroundStyle(.secondary)
-                    }
+            VStack(alignment: .leading, spacing: 6) {
+                hint("Esta letra no trae tiempos, así que no puede seguir la canción.")
                     ScrollView {
                         Text(lyrics.lines.joined(separator: "\n"))
                             .font(.title3)
@@ -227,7 +228,6 @@ private struct LyricsPanel: View {
                             .textSelection(.enabled)
                             .frame(maxWidth: .infinity, alignment: .leading)
                     }
-                }
             }
         } else if player.lyricsPending {
             HStack(spacing: 8) {
@@ -243,8 +243,11 @@ private struct LyricsPanel: View {
         Text(text).font(.title3).foregroundStyle(.secondary)
     }
 
-    private var isSynced: Bool {
-        player.songStartIsExact && !(player.lyrics?.synced.isEmpty ?? true)
+    private func hint(_ text: LocalizedStringKey) -> some View {
+        Text(text)
+            .font(.callout)
+            .foregroundStyle(.secondary)
+            .fixedSize(horizontal: false, vertical: true)
     }
 }
 
@@ -279,26 +282,37 @@ private struct SyncAdjuster: View {
     }
 }
 
-/// Lyrics that follow the song: the line being sung is highlighted and kept in view.
+/// Lyrics that follow the song: the line being sung is highlighted and kept in view. Every line
+/// is also a button — clicking the one being sung puts the lyrics in step (`start` nil: the
+/// position isn't known yet, so nothing is highlighted until then).
 private struct SyncedLyrics: View {
     let lyrics: SongLyrics
-    let start: Date
+    let start: Date?
     let reduceMotion: Bool
+    let onPick: (Int) -> Void
 
     var body: some View {
         TimelineView(.periodic(from: .now, by: 0.25)) { context in
-            let current = lyrics.lineIndex(at: context.date.timeIntervalSince(start))
+            let current = start.flatMap { lyrics.lineIndex(at: context.date.timeIntervalSince($0)) }
             ScrollViewReader { proxy in
                 ScrollView {
                     VStack(alignment: .leading, spacing: 10) {
                         ForEach(Array(lyrics.synced.enumerated()), id: \.offset) { index, line in
-                            Text(line.text.isEmpty ? "♪" : line.text)
-                                .font(.title3.weight(index == current ? .bold : .regular))
-                                .foregroundStyle(index == current ? AnyShapeStyle(.primary)
-                                                 : (current.map { index < $0 } ?? false)
-                                                    ? AnyShapeStyle(.tertiary) : AnyShapeStyle(.secondary))
-                                .id(index)
-                                .accessibilityAddTraits(index == current ? .isSelected : [])
+                            Button { onPick(index) } label: {
+                                Text(line.text.isEmpty ? "♪" : line.text)
+                                    .font(.title3.weight(index == current ? .bold : .regular))
+                                    .foregroundStyle(index == current ? AnyShapeStyle(.primary)
+                                                     : (current.map { index < $0 } ?? false)
+                                                        ? AnyShapeStyle(.tertiary) : AnyShapeStyle(.secondary))
+                                    .multilineTextAlignment(.leading)
+                                    .frame(maxWidth: .infinity, alignment: .leading)
+                                    .contentShape(Rectangle())
+                            }
+                            .buttonStyle(.plain)
+                            .help("Suena ahora: sincronizar desde esta línea")
+                            .accessibilityHint(Text("Sincroniza la letra desde esta línea"))
+                            .id(index)
+                            .accessibilityAddTraits(index == current ? .isSelected : [])
                         }
                     }
                     .frame(maxWidth: .infinity, alignment: .leading)

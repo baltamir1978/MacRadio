@@ -59,11 +59,11 @@
 "Escuchar %@" = "Ouvir %@";
 "Escuchar emisora" = "Ouvir estação";
 "Escúchala sin añadirla" = "Ouvir sem adicionar";
+"Esta letra no trae tiempos, así que no puede seguir la canción." = "Esta letra não traz tempos, por isso não pode acompanhar a canção.";
 "Favoritas" = "Favoritas";
 "Guarda la canción que suena entre tus favoritas de MacRadio, o la quita." = "Junta a canção que está a tocar às suas favoritas do MacRadio, ou retira-a.";
 "Guardar" = "Guardar";
 "Género (opcional)" = "Género (opcional)";
-"Has sintonizado a mitad de canción: la letra irá sincronizada desde la siguiente." = "Sintonizou a meio da canção: a letra acompanha a partir da próxima.";
 "Haz clic con el botón derecho en el escritorio, elige «Editar widgets…» y busca MacRadio. Para elegir sus emisoras, haz clic con el botón derecho sobre el widget y elige «Editar “MacRadio”»." = "Clique com o botão direito na secretária, escolha «Editar widgets…» e procure MacRadio. Para escolher as estações, clique com o botão direito no widget e escolha «Editar “MacRadio”».";
 "Historial" = "Histórico";
 "Historial de canciones (⌘Y)" = "Histórico de canções (⌘Y)";
@@ -92,6 +92,7 @@
 "No hay letra para esta canción." = "Não há letra para esta canção.";
 "No se ha reconocido la canción" = "A canção não foi reconhecida";
 "No se pudo buscar" = "Não foi possível procurar";
+"No se sabe por dónde va la canción: haz clic en la línea que está sonando y la letra seguirá desde ahí." = "Não se sabe em que ponto vai a canção: clique na linha que está a tocar e a letra acompanha a partir daí.";
 "No volver a guardar este título en %@" = "Não voltar a guardar este título em %@";
 "Nombre" = "Nome";
 "Nombre de la emisora" = "Nome da estação";
@@ -115,8 +116,10 @@
 "Sin datos de la canción" = "Sem dados da canção";
 "Sin emisoras" = "Sem estações";
 "Sin favoritas" = "Sem favoritas";
+"Sincroniza la letra desde esta línea" = "Sincroniza a letra a partir desta linha";
 "Sonando" = "A tocar";
 "Subir volumen" = "Aumentar volume";
+"Suena ahora: sincronizar desde esta línea" = "A tocar agora: sincronizar a partir desta linha";
 "Tiene que ser una dirección http o https." = "Tem de ser um endereço http ou https.";
 "Todas" = "Todas";
 "Títulos ignorados" = "Títulos ignorados";
@@ -130,4 +133,5 @@
 "Ya tienes una emisora con esta dirección." = "Já tem uma estação com este endereço.";
 "línea a línea, a su ritmo" = "linha a linha, ao seu ritmo";
 "que suena en la radio," = "que toca na rádio,";
+"¿Va desfasada? Haz clic en la línea que está sonando." = "Está desfasada? Clique na linha que está a tocar.";
 "¿Vaciar el historial?" = "Limpar o histórico?";
