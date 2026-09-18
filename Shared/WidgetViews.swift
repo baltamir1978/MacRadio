@@ -1,0 +1,465 @@
+import AppIntents
+import AppKit
+import SwiftUI
+import WidgetKit
+
+// The widget's views live here, compiled into the app as well as the extension, so the app can
+// render them offscreen (`--render-widgets`) and the layout can be checked without placing a
+// widget on the desktop by hand.
+
+nonisolated struct RadioEntry: TimelineEntry {
+    let date: Date
+    let snapshot: NowPlayingSnapshot?
+    /// Stations offered as buttons, already filtered by the widget's configuration.
+    let stations: [SharedStation]
+    /// Line of the synced lyrics being sung at `date`, if known.
+    let lyricIndex: Int?
+}
+
+extension RadioEntry {
+    /// What the widget gallery shows before the app has ever run.
+    static var sample: RadioEntry {
+        let stations = ["Cadena 100", "Kiss FM", "La Indie", "Cassette FM", "Los 40 Classic"].map {
+            SharedStation(name: $0, streamURL: "sample://\($0)", logoFile: nil, initials: initials(of: $0))
+        }
+        let lyrics = SongLyrics(synced: [
+            LyricLine(time: 0, text: "♪"),
+            LyricLine(time: 4, text: String(localized: "Aquí va la letra de la canción")),
+            LyricLine(time: 8, text: String(localized: "que suena en la radio,")),
+            LyricLine(time: 12, text: String(localized: "línea a línea, a su ritmo")),
+        ], plain: [], isInstrumental: false)
+        let snapshot = NowPlayingSnapshot(stationName: "Cadena 100", streamURL: "sample://Cadena 100",
+                                          track: String(localized: "Canción en directo"),
+                                          artist: String(localized: "Artista"),
+                                          artworkFile: nil, artworkIsCover: false,
+                                          isPlaying: true, isLoading: false,
+                                          songStartedAt: nil, songStartIsExact: false,
+                                          lyrics: lyrics, lyricsPending: false, isFavorite: false)
+        return RadioEntry(date: Date(), snapshot: snapshot, stations: stations, lyricIndex: 1)
+    }
+}
+
+struct RadioWidgetView: View {
+    let entry: RadioEntry
+    let family: WidgetFamily
+
+    var body: some View {
+        Group {
+            switch family {
+            case .systemSmall: SmallLayout(entry: entry)
+            case .systemMedium: MediumLayout(entry: entry)
+            case .systemExtraLarge: ExtraLargeLayout(entry: entry)
+            default: LargeLayout(entry: entry)
+            }
+        }
+        .containerBackground(for: .widget) { Color.appBackground }
+        .widgetURL(URL(string: "macradio://open"))
+    }
+}
+
+// MARK: - Layouts
+
+private struct SmallLayout: View {
+    let entry: RadioEntry
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 6) {
+            HStack(alignment: .top) {
+                ArtworkView(snapshot: entry.snapshot, size: 64)
+                Spacer(minLength: 4)
+                PlayPauseButton(isPlaying: entry.snapshot?.isPlaying ?? false, size: 30)
+            }
+            Spacer(minLength: 0)
+            SongText(snapshot: entry.snapshot, titleFont: .system(size: 13, weight: .semibold), titleLines: 2)
+        }
+    }
+}
+
+private struct MediumLayout: View {
+    let entry: RadioEntry
+
+    var body: some View {
+        HStack(spacing: 14) {
+            ArtworkView(snapshot: entry.snapshot, size: 132)
+            VStack(alignment: .leading, spacing: 0) {
+                StatusLine(snapshot: entry.snapshot)
+                SongText(snapshot: entry.snapshot, titleFont: .system(size: 15, weight: .semibold), titleLines: 2)
+                    .padding(.top, 3)
+                Spacer(minLength: 6)
+                HStack(spacing: 6) {
+                    PlayPauseButton(isPlaying: entry.snapshot?.isPlaying ?? false, size: 30)
+                    ForEach(entry.stations.prefix(4)) { station in
+                        StationButton(station: station, current: entry.snapshot?.streamURL, size: 28)
+                    }
+                }
+            }
+            .frame(maxWidth: .infinity, alignment: .leading)
+        }
+    }
+}
+
+private struct LargeLayout: View {
+    let entry: RadioEntry
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            HStack(spacing: 12) {
+                ArtworkView(snapshot: entry.snapshot, size: 112)
+                VStack(alignment: .leading, spacing: 0) {
+                    StatusLine(snapshot: entry.snapshot)
+                    SongText(snapshot: entry.snapshot, titleFont: .system(size: 15, weight: .semibold), titleLines: 2)
+                        .padding(.top, 3)
+                    Spacer(minLength: 4)
+                    TransportControls(isPlaying: entry.snapshot?.isPlaying ?? false, favorite: favoriteState(entry.snapshot))
+                }
+                .frame(maxWidth: .infinity, alignment: .leading)
+            }
+            .frame(height: 112)
+
+            LyricsBlock(entry: entry, maxLines: 6)
+                .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+
+            StationStrip(stations: Array(entry.stations.prefix(7)), current: entry.snapshot?.streamURL, size: 36)
+        }
+    }
+}
+
+private struct ExtraLargeLayout: View {
+    let entry: RadioEntry
+
+    var body: some View {
+        HStack(alignment: .top, spacing: 20) {
+            VStack(alignment: .leading, spacing: 10) {
+                HStack(spacing: 14) {
+                    ArtworkView(snapshot: entry.snapshot, size: 128)
+                    VStack(alignment: .leading, spacing: 0) {
+                        StatusLine(snapshot: entry.snapshot)
+                        SongText(snapshot: entry.snapshot, titleFont: .system(size: 17, weight: .semibold), titleLines: 3)
+                            .padding(.top, 4)
+                        Spacer(minLength: 4)
+                        TransportControls(isPlaying: entry.snapshot?.isPlaying ?? false, favorite: favoriteState(entry.snapshot))
+                    }
+                }
+                .frame(height: 128)
+                Spacer(minLength: 0)
+                StationGrid(stations: Array(entry.stations.prefix(8)), current: entry.snapshot?.streamURL)
+            }
+            .frame(width: 330)
+
+            Divider()
+
+            LyricsBlock(entry: entry, maxLines: 12)
+                .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+        }
+    }
+}
+
+// MARK: - Pieces
+
+/// Album cover, full-bleed; a station logo sits on white with a little air, as in the app.
+struct ArtworkView: View {
+    let snapshot: NowPlayingSnapshot?
+    let size: CGFloat
+
+    var body: some View {
+        let image = SharedStore.imageURL(named: snapshot?.artworkFile).flatMap(NSImage.init(contentsOf:))
+        let isCover = snapshot?.artworkIsCover ?? false
+        ZStack {
+            if let image {
+                if isCover {
+                    Image(nsImage: image).resizable().widgetAccentedRenderingMode(.fullColor)
+                        .aspectRatio(contentMode: .fill)
+                } else {
+                    Color.white
+                    Image(nsImage: image).resizable().widgetAccentedRenderingMode(.fullColor)
+                        .aspectRatio(contentMode: .fit)
+                        .padding(size * 0.08)
+                }
+            } else if let name = snapshot?.stationName {
+                InitialsTile(name: name, size: size)
+            } else {
+                Color.mintSurface
+                Image(systemName: "radio").font(.system(size: size * 0.4)).foregroundStyle(Color.brand)
+            }
+        }
+        .frame(width: size, height: size)
+        .clipShape(RoundedRectangle(cornerRadius: size * 0.16, style: .continuous))
+        .accessibilityHidden(true)
+    }
+}
+
+private struct InitialsTile: View {
+    let name: String
+    let size: CGFloat
+
+    var body: some View {
+        ZStack {
+            Color.tile(for: name)
+            Text(initials(of: name))
+                .font(.system(size: size * 0.36, weight: .bold, design: .rounded))
+                .foregroundStyle(.white)
+                .minimumScaleFactor(0.5)
+        }
+    }
+}
+
+private struct StatusLine: View {
+    let snapshot: NowPlayingSnapshot?
+
+    var body: some View {
+        HStack(spacing: 4) {
+            if let snapshot {
+                Image(systemName: snapshot.isPlaying ? "dot.radiowaves.left.and.right" : "pause.fill")
+                    .font(.system(size: 9, weight: .bold))
+                Text(snapshot.stationName).lineLimit(1)
+                Text("·")
+                Text(statusText(snapshot)).lineLimit(1).layoutPriority(-1)
+            } else {
+                Image(systemName: "radio").font(.system(size: 9, weight: .bold))
+                Text("MacRadio")
+            }
+        }
+        .font(.system(size: 11, weight: .semibold))
+        .foregroundStyle(Color.brand)
+    }
+
+    private func statusText(_ s: NowPlayingSnapshot) -> LocalizedStringKey {
+        if s.isPlaying && s.isLoading { return "Conectando…" }
+        return s.isPlaying ? "En directo" : "En pausa"
+    }
+}
+
+private struct SongText: View {
+    let snapshot: NowPlayingSnapshot?
+    let titleFont: Font
+    let titleLines: Int
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 2) {
+            if let snapshot, snapshot.hasSong {
+                Text(snapshot.track ?? "")
+                    .font(titleFont)
+                    .lineLimit(titleLines)
+                if let artist = snapshot.artist, !artist.isEmpty {
+                    Text(artist)
+                        .font(.system(size: 12))
+                        .foregroundStyle(.secondary)
+                        .lineLimit(1)
+                }
+            } else if let snapshot {
+                Text(snapshot.stationName)
+                    .font(titleFont)
+                    .lineLimit(titleLines)
+                Text("Sin datos de la canción")
+                    .font(.system(size: 12))
+                    .foregroundStyle(.secondary)
+                    .lineLimit(1)
+            } else {
+                Text("Elige una emisora")
+                    .font(titleFont)
+                    .lineLimit(titleLines)
+            }
+        }
+    }
+}
+
+private struct PlayPauseButton: View {
+    let isPlaying: Bool
+    let size: CGFloat
+
+    var body: some View {
+        Button(intent: TogglePlaybackIntent()) {
+            Image(systemName: isPlaying ? "pause.fill" : "play.fill")
+                .font(.system(size: size * 0.42, weight: .bold))
+                .foregroundStyle(Color.appBackground)
+                .frame(width: size, height: size)
+                .background(Circle().fill(Color.brand))
+        }
+        .buttonStyle(.plain)
+        .accessibilityLabel(isPlaying ? Text("Pausar") : Text("Reproducir"))
+    }
+}
+
+/// The heart only means something while the station names a song.
+private func favoriteState(_ snapshot: NowPlayingSnapshot?) -> Bool? {
+    guard let snapshot, snapshot.hasSong else { return nil }
+    return snapshot.isFavorite
+}
+
+private struct TransportControls: View {
+    let isPlaying: Bool
+    /// nil hides the heart.
+    let favorite: Bool?
+
+    var body: some View {
+        HStack(spacing: 14) {
+            Button(intent: PreviousStationIntent()) {
+                Image(systemName: "backward.fill").font(.system(size: 13, weight: .semibold))
+            }
+            .buttonStyle(.plain)
+            .foregroundStyle(Color.brand)
+            .accessibilityLabel(Text("Emisora anterior"))
+
+            PlayPauseButton(isPlaying: isPlaying, size: 32)
+
+            Button(intent: NextStationIntent()) {
+                Image(systemName: "forward.fill").font(.system(size: 13, weight: .semibold))
+            }
+            .buttonStyle(.plain)
+            .foregroundStyle(Color.brand)
+            .accessibilityLabel(Text("Emisora siguiente"))
+
+            if let favorite {
+                Button(intent: ToggleFavoriteIntent()) {
+                    Image(systemName: favorite ? "heart.fill" : "heart").font(.system(size: 14, weight: .semibold))
+                }
+                .buttonStyle(.plain)
+                .foregroundStyle(Color.brand)
+                .accessibilityLabel(favorite ? Text("Quitar de favoritas") : Text("Marcar como favorita"))
+            }
+        }
+    }
+}
+
+private struct StationButton: View {
+    let station: SharedStation
+    let current: String?
+    let size: CGFloat
+
+    private var isCurrent: Bool { station.streamURL == current }
+
+    var body: some View {
+        Button(intent: PlayStationIntent(station: StationEntity(id: station.streamURL, name: station.name))) {
+            StationLogoTile(station: station, size: size)
+                .overlay {
+                    RoundedRectangle(cornerRadius: size * 0.24, style: .continuous)
+                        .strokeBorder(Color.brand, lineWidth: isCurrent ? 2.5 : 0)
+                }
+        }
+        .buttonStyle(.plain)
+        .accessibilityLabel(Text("Escuchar \(station.name)"))
+    }
+}
+
+private struct StationLogoTile: View {
+    let station: SharedStation
+    let size: CGFloat
+
+    var body: some View {
+        ZStack {
+            if let image = SharedStore.imageURL(named: station.logoFile).flatMap(NSImage.init(contentsOf:)) {
+                Color.white
+                Image(nsImage: image).resizable().widgetAccentedRenderingMode(.fullColor)
+                    .aspectRatio(contentMode: .fit)
+                    .padding(size * 0.08)
+            } else {
+                InitialsTile(name: station.name, size: size)
+            }
+        }
+        .frame(width: size, height: size)
+        .clipShape(RoundedRectangle(cornerRadius: size * 0.24, style: .continuous))
+    }
+}
+
+/// A row of station buttons that spreads out to the widget's width.
+private struct StationStrip: View {
+    let stations: [SharedStation]
+    let current: String?
+    let size: CGFloat
+
+    var body: some View {
+        HStack(spacing: 0) {
+            ForEach(Array(stations.enumerated()), id: \.element.id) { index, station in
+                if index > 0 { Spacer(minLength: 4) }
+                StationButton(station: station, current: current, size: size)
+            }
+            if stations.count < 2 { Spacer(minLength: 0) }
+        }
+    }
+}
+
+/// Two rows of four, with names — the extra-large widget has room for them.
+private struct StationGrid: View {
+    let stations: [SharedStation]
+    let current: String?
+
+    var body: some View {
+        let columns = Array(repeating: GridItem(.flexible(), spacing: 8), count: 4)
+        LazyVGrid(columns: columns, alignment: .leading, spacing: 8) {
+            ForEach(stations) { station in
+                VStack(spacing: 3) {
+                    StationButton(station: station, current: current, size: 44)
+                    Text(station.name)
+                        .font(.system(size: 10, weight: .medium))
+                        .lineLimit(1)
+                        .foregroundStyle(station.streamURL == current ? Color.brand : .secondary)
+                }
+                .frame(maxWidth: .infinity)
+            }
+        }
+    }
+}
+
+// MARK: - Lyrics
+
+/// The lyrics window: the line being sung, one before it and the ones coming up.
+///
+/// A widget can't scroll or animate, so the timeline carries one entry per synced line and
+/// each entry is drawn with its own `lyricIndex` — the window steps along as the song plays.
+struct LyricsBlock: View {
+    let entry: RadioEntry
+    let maxLines: Int
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 5) {
+            Label("Letra", systemImage: "quote.bubble")
+                .font(.system(size: 10, weight: .semibold))
+                .foregroundStyle(Color.brand)
+                .textCase(.uppercase)
+            content
+        }
+    }
+
+    @ViewBuilder
+    private var content: some View {
+        if let snapshot = entry.snapshot, snapshot.hasSong {
+            if let lyrics = snapshot.lyrics, lyrics.isInstrumental {
+                note("Instrumental ♪")
+            } else if let lyrics = snapshot.lyrics, !lyrics.isEmpty {
+                lines(lyrics)
+            } else if snapshot.lyricsPending {
+                note("Buscando la letra…")
+            } else {
+                note("No hay letra para esta canción.")
+            }
+        } else {
+            note("La letra aparece cuando la emisora dice qué canción suena.")
+        }
+    }
+
+    private func note(_ text: LocalizedStringKey) -> some View {
+        Text(text)
+            .font(.system(size: 12))
+            .foregroundStyle(.secondary)
+            .fixedSize(horizontal: false, vertical: true)
+    }
+
+    private func lines(_ lyrics: SongLyrics) -> some View {
+        let all = lyrics.lines
+        let current = entry.lyricIndex
+        // Keep one sung line above the current one for context.
+        let first = max(0, min((current ?? 0) - 1, all.count - maxLines))
+        let window = Array(all.enumerated()).dropFirst(first).prefix(maxLines)
+        return VStack(alignment: .leading, spacing: 4) {
+            ForEach(Array(window), id: \.offset) { index, text in
+                let isCurrent = index == current
+                let isPast = current.map { index < $0 } ?? false
+                Text(text.isEmpty ? "♪" : text)
+                    .font(.system(size: isCurrent ? 14 : 13, weight: isCurrent ? .semibold : .regular))
+                    .foregroundStyle(isCurrent ? AnyShapeStyle(Color.primary)
+                                     : isPast ? AnyShapeStyle(.tertiary) : AnyShapeStyle(.secondary))
+                    .lineLimit(isCurrent ? 2 : 1)
+            }
+        }
+    }
+}
