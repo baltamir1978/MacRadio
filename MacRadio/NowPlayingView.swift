@@ -67,9 +67,14 @@ private struct PlayerColumn: View {
 
     private var statusText: LocalizedStringKey {
         if player.isReconnecting { return "Reconectando…" }
+        if player.isIdentifying { return "Identificando la canción…" }
         if player.isLoading { return "Conectando…" }
         if !player.isPlaying { return "En pausa" }
-        return player.currentTrack == nil ? "En directo · la emisora no dice qué suena" : "En directo"
+        if player.currentTrack == nil {
+            return ShazamService.shared.failure != nil ? "En directo · no se ha reconocido la canción"
+                                                       : "En directo · la emisora no dice qué suena"
+        }
+        return "En directo"
     }
 }
 
@@ -134,6 +139,19 @@ struct TransportBar: View {
             .help("Emisora siguiente")
             .accessibilityLabel(Text("Emisora siguiente"))
         }
+        .overlay(alignment: .leading) {
+            // Shazam where the heart would be, mirrored: only when there's no song to heart.
+            if player.historyEntryID == nil && player.isPlaying {
+                Button { player.identifySong() } label: {
+                    Image(systemName: "shazam.logo")
+                        .symbolEffect(.pulse, isActive: player.isIdentifying)
+                }
+                .disabled(player.isIdentifying)
+                .help("Identificar la canción (⌘I)")
+                .accessibilityLabel(Text("Identificar la canción"))
+                .offset(x: size == .large ? -52 : -40)
+            }
+        }
         .overlay(alignment: .trailing) {
             // Beside the controls rather than among them, so play/pause stays centred.
             if player.historyEntryID != nil {
@@ -174,9 +192,13 @@ private struct LyricsPanel: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
-            Text("Letra")
-                .font(.headline)
-                .foregroundStyle(Color.brand)
+            HStack {
+                Text("Letra")
+                    .font(.headline)
+                    .foregroundStyle(Color.brand)
+                Spacer()
+                if isSynced { SyncAdjuster() }
+            }
             content
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
@@ -189,7 +211,7 @@ private struct LyricsPanel: View {
         } else if let lyrics = player.lyrics, lyrics.isInstrumental {
             note("Instrumental ♪")
         } else if let lyrics = player.lyrics, !lyrics.isEmpty {
-            if !lyrics.synced.isEmpty, player.songStartIsExact, let start = player.songStartedAt {
+            if !lyrics.synced.isEmpty, player.songStartIsExact, let start = player.lyricsStart {
                 SyncedLyrics(lyrics: lyrics, start: start, reduceMotion: reduceMotion)
             } else {
                 VStack(alignment: .leading, spacing: 8) {
@@ -219,6 +241,41 @@ private struct LyricsPanel: View {
 
     private func note(_ text: LocalizedStringKey) -> some View {
         Text(text).font(.title3).foregroundStyle(.secondary)
+    }
+
+    private var isSynced: Bool {
+        player.songStartIsExact && !(player.lyrics?.synced.isEmpty ?? true)
+    }
+}
+
+/// Nudges the lyrics earlier or later for this station, half a second at a time.
+private struct SyncAdjuster: View {
+    @EnvironmentObject private var player: RadioPlayer
+
+    var body: some View {
+        HStack(spacing: 6) {
+            Button { player.nudgeLyrics(by: -0.5) } label: { Image(systemName: "minus") }
+                .help("Retrasar la letra medio segundo")
+                .accessibilityLabel(Text("Retrasar la letra"))
+            Text(offsetText)
+                .monospacedDigit()
+                .font(.callout)
+                .foregroundStyle(.secondary)
+                .frame(minWidth: 52)
+                .onTapGesture(count: 2) { player.resetLyricsOffset() }
+                .help("Ajuste de la letra para esta emisora. Doble clic para volver a cero.")
+                .accessibilityLabel(Text("Ajuste de la letra: \(offsetText)"))
+            Button { player.nudgeLyrics(by: 0.5) } label: { Image(systemName: "plus") }
+                .help("Adelantar la letra medio segundo")
+                .accessibilityLabel(Text("Adelantar la letra"))
+        }
+        .buttonStyle(.borderless)
+        .controlSize(.small)
+    }
+
+    private var offsetText: String {
+        player.lyricsOffset == 0 ? "±0 s"
+            : player.lyricsOffset.formatted(.number.precision(.fractionLength(1)).sign(strategy: .always())) + " s"
     }
 }
 

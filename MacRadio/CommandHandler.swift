@@ -18,6 +18,8 @@ enum CommandHandler {
             player.playPrevious()
         case .toggleFavorite:
             player.toggleFavorite()
+        case .identify:
+            player.identifySong()
         }
     }
 

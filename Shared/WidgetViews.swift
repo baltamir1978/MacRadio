@@ -34,7 +34,7 @@ extension RadioEntry {
                                           artworkFile: nil, artworkIsCover: false,
                                           isPlaying: true, isLoading: false,
                                           songStartedAt: nil, songStartIsExact: false,
-                                          lyrics: lyrics, lyricsPending: false, isFavorite: false)
+                                          lyrics: lyrics, lyricsPending: false, isFavorite: false, isIdentifying: false)
         return RadioEntry(date: Date(), snapshot: snapshot, stations: stations, lyricIndex: 1)
     }
 }
@@ -250,7 +250,7 @@ private struct SongText: View {
                 Text(snapshot.stationName)
                     .font(titleFont)
                     .lineLimit(titleLines)
-                Text("Sin datos de la canción")
+                Text(snapshot.isIdentifying ? "Identificando la canción…" : "Sin datos de la canción")
                     .font(.system(size: 12))
                     .foregroundStyle(.secondary)
                     .lineLimit(1)
@@ -309,6 +309,14 @@ private struct TransportControls: View {
             .foregroundStyle(Color.brand)
             .accessibilityLabel(Text("Emisora siguiente"))
 
+            if favorite == nil, isPlaying {
+                Button(intent: IdentifySongIntent()) {
+                    Image(systemName: "shazam.logo").font(.system(size: 15, weight: .semibold))
+                }
+                .buttonStyle(.plain)
+                .foregroundStyle(Color.brand)
+                .accessibilityLabel(Text("Identificar la canción"))
+            }
             if let favorite {
                 Button(intent: ToggleFavoriteIntent()) {
                     Image(systemName: favorite ? "heart.fill" : "heart").font(.system(size: 14, weight: .semibold))

@@ -168,7 +168,9 @@ nonisolated struct NowPlayingSnapshot: Codable, Sendable, Equatable {
     var artworkIsCover: Bool
     var isPlaying: Bool
     var isLoading: Bool
-    /// When the current song started. `songStartIsExact` says whether it can drive the lyrics:
+    /// When the current song started, as the lyrics should count it (the app has already applied
+    /// its lead and the user's per-station adjustment). `songStartIsExact` says whether it can
+    /// drive the lyrics:
     /// the app saw the title change, or the station published it. Tuning in mid-song to a
     /// station that doesn't gives a start time that is merely "now".
     var songStartedAt: Date?
@@ -178,6 +180,8 @@ nonisolated struct NowPlayingSnapshot: Codable, Sendable, Equatable {
     var lyricsPending: Bool
     /// The song is hearted in the app's history.
     var isFavorite: Bool
+    /// ShazamKit is listening to find out what's playing.
+    var isIdentifying: Bool
 
     var hasSong: Bool { !(track ?? "").isEmpty }
 }

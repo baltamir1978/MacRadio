@@ -9,6 +9,7 @@ nonisolated enum PlayerCommand: Codable, Sendable, Equatable {
     case next
     case previous
     case toggleFavorite
+    case identify
 }
 
 // MARK: - Delivery
@@ -98,7 +99,7 @@ extension SharedStore {
                                           artworkFile: station.logoFile, artworkIsCover: false,
                                           isPlaying: true, isLoading: true,
                                           songStartedAt: nil, songStartIsExact: false,
-                                          lyrics: nil, lyricsPending: false, isFavorite: false)
+                                          lyrics: nil, lyricsPending: false, isFavorite: false, isIdentifying: false)
         }
 
         func neighbour(_ step: Int) -> SharedStation? {
@@ -123,6 +124,8 @@ extension SharedStore {
             if let station = neighbour(-1) { tune(station) }
         case .toggleFavorite:
             if snapshot?.hasSong == true { snapshot?.isFavorite.toggle() }
+        case .identify:
+            if snapshot?.isPlaying == true { snapshot?.isIdentifying = true }
         }
 
         // Written without asking WidgetKit to reload: finishing the intent already does that.

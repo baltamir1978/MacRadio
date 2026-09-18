@@ -4,6 +4,8 @@ import SwiftUI
 struct SettingsView: View {
     @EnvironmentObject private var player: RadioPlayer
     @AppStorage("show_menu_bar") private var showInMenuBar = true
+    @AppStorage("skip_intros") private var skipIntros = true
+    @ObservedObject private var shazam = ShazamService.shared
     @State private var launchAtLogin = SMAppService.mainApp.status == .enabled
     @State private var loginError: String?
 
@@ -18,6 +20,25 @@ struct SettingsView: View {
                 Toggle("Mostrar en la barra de menús", isOn: $showInMenuBar)
             } footer: {
                 Text("Con la app abierta, los botones del widget responden al instante.")
+            }
+
+            Section {
+                Toggle("Identificar canciones automáticamente", isOn: Binding(
+                    get: { player.autoIdentify }, set: { player.autoIdentify = $0 }))
+                if shazam.unavailable {
+                    Label("Apple no ha autorizado a MacRadio a usar Shazam. Hay que activar ShazamKit para el identificador Altamirano.MacRadio en developer.apple.com.",
+                          systemImage: "exclamationmark.triangle")
+                        .foregroundStyle(.orange)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
+            } footer: {
+                Text("En las emisoras que no dicen qué suena (como Kiss FM), MacRadio pregunta a Shazam cada minuto. Así aparecen la carátula, la letra sincronizada y el historial. Si sintonizas a mitad de canción, Shazam también dice por dónde va, para que la letra siga el ritmo.")
+            }
+
+            Section {
+                Toggle("Saltar la cuña de entrada", isOn: $skipIntros)
+            } footer: {
+                Text("Algunas emisoras ponen anuncios a cada oyente que se conecta. MacRadio los reconoce y se los salta: a cambio, la emisora tarda unos segundos más en empezar a sonar.")
             }
 
             Section {

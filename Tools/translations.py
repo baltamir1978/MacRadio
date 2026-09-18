@@ -103,19 +103,69 @@ T = {
     "Ya tienes una emisora con esta dirección.": ("You already have a station with this address.", "Vous avez déjà une station avec cette adresse.", "Du hast bereits einen Sender mit dieser Adresse.", "Já tem uma estação com este endereço."),
     "línea a línea, a su ritmo": ("line by line, in time", "ligne après ligne, en rythme", "Zeile für Zeile, im Takt", "linha a linha, ao seu ritmo"),
     "que suena en la radio,": ("playing on the radio,", "qui passe à la radio,", "der im Radio läuft,", "que toca na rádio,"),
+    "%@ · %@": ("%@ · %@", "%@ · %@", "%@ · %@", "%@ · %@"),
+    "Adelantar la letra": ("Move Lyrics Earlier", "Avancer les paroles", "Songtext früher", "Adiantar a letra"),
+    "Adelantar la letra medio segundo": ("Move the lyrics half a second earlier", "Avancer les paroles d’une demi-seconde", "Songtext eine halbe Sekunde früher", "Adiantar a letra meio segundo"),
+    "Ajuste de la letra para esta emisora. Doble clic para volver a cero.": ("Lyrics timing for this station. Double-click to reset.", "Décalage des paroles pour cette station. Double-cliquez pour remettre à zéro.", "Textversatz für diesen Sender. Doppelklick setzt ihn zurück.", "Acerto da letra para esta estação. Duplo clique para repor."),
+    "Ajuste de la letra: %@": ("Lyrics timing: %@", "Décalage des paroles : %@", "Textversatz: %@", "Acerto da letra: %@"),
+    "Algunas emisoras ponen anuncios a cada oyente que se conecta. MacRadio los reconoce y se los salta: a cambio, la emisora tarda unos segundos más en empezar a sonar.": ("Some stations play ads to every listener who connects. MacRadio recognises and skips them; in exchange, the station takes a few seconds longer to start.", "Certaines stations diffusent des pubs à chaque auditeur qui se connecte. MacRadio les reconnaît et les saute ; en contrepartie, la station met quelques secondes de plus à démarrer.", "Manche Sender spielen jedem neuen Hörer Werbung vor. MacRadio erkennt und überspringt sie – dafür dauert der Start ein paar Sekunden länger.", "Algumas estações passam anúncios a cada ouvinte que se liga. O MacRadio reconhece-os e salta-os; em troca, a estação demora mais uns segundos a começar."),
+    "Apple no ha autorizado a MacRadio a usar Shazam. Hay que activar ShazamKit para el identificador Altamirano.MacRadio en developer.apple.com.": ("Apple hasn’t authorised MacRadio to use Shazam. ShazamKit has to be enabled for the identifier Altamirano.MacRadio at developer.apple.com.", "Apple n’a pas autorisé MacRadio à utiliser Shazam. Il faut activer ShazamKit pour l’identifiant Altamirano.MacRadio sur developer.apple.com.", "Apple hat MacRadio die Nutzung von Shazam nicht erlaubt. ShazamKit muss für die Kennung Altamirano.MacRadio auf developer.apple.com aktiviert werden.", "A Apple não autorizou o MacRadio a usar o Shazam. É preciso ativar o ShazamKit para o identificador Altamirano.MacRadio em developer.apple.com."),
+    "Averigua con Shazam qué canción suena en la emisora.": ("Finds out with Shazam which song the station is playing.", "Découvre avec Shazam la chanson diffusée par la station.", "Findet mit Shazam heraus, welcher Song gerade läuft.", "Descobre com o Shazam que canção está a tocar na estação."),
+    "Buscar en el historial": ("Search History", "Rechercher dans l’historique", "Verlauf durchsuchen", "Procurar no histórico"),
+    "Copiar título y artista": ("Copy Title and Artist", "Copier le titre et l’artiste", "Titel und Künstler kopieren", "Copiar título e artista"),
+    "El historial está vacío": ("History Is Empty", "L’historique est vide", "Der Verlauf ist leer", "O histórico está vazio"),
+    "En directo · no se ha reconocido la canción": ("Live · the song wasn’t recognised", "En direct · chanson non reconnue", "Live · Song nicht erkannt", "Em direto · a canção não foi reconhecida"),
+    "En las emisoras que no dicen qué suena (como Kiss FM), MacRadio pregunta a Shazam cada minuto. Así aparecen la carátula, la letra sincronizada y el historial. Si sintonizas a mitad de canción, Shazam también dice por dónde va, para que la letra siga el ritmo.": ("On stations that don’t say what’s playing (like Kiss FM), MacRadio asks Shazam every minute, so you get the cover, synced lyrics and history. If you tune in mid-song, Shazam also tells where it is, so the lyrics keep time.", "Sur les stations qui n’indiquent pas ce qui passe (comme Kiss FM), MacRadio interroge Shazam chaque minute : pochette, paroles synchronisées et historique s’affichent. Si vous arrivez en cours de chanson, Shazam indique aussi où elle en est, pour que les paroles suivent.", "Bei Sendern, die nicht verraten, was läuft (wie Kiss FM), fragt MacRadio jede Minute Shazam – so erscheinen Cover, synchroner Text und Verlauf. Schaltest du mitten im Song ein, sagt Shazam auch, wo er gerade ist, damit der Text im Takt bleibt.", "Nas estações que não dizem o que está a tocar (como a Kiss FM), o MacRadio pergunta ao Shazam a cada minuto: assim aparecem a capa, a letra sincronizada e o histórico. Se sintonizar a meio da canção, o Shazam também diz onde vai, para a letra acompanhar."),
+    "Favoritas": ("Favourites", "Favoris", "Favoriten", "Favoritas"),
+    "Guarda la canción que suena entre tus favoritas de MacRadio, o la quita.": ("Adds the song that’s playing to your MacRadio favourites, or removes it.", "Ajoute la chanson en cours à vos favoris MacRadio, ou l’en retire.", "Fügt den laufenden Song deinen MacRadio-Favoriten hinzu oder entfernt ihn.", "Junta a canção que está a tocar às suas favoritas do MacRadio, ou retira-a."),
+    "Historial": ("History", "Historique", "Verlauf", "Histórico"),
+    "Historial de canciones (⌘Y)": ("Song History (⌘Y)", "Historique des chansons (⌘Y)", "Songverlauf (⌘Y)", "Histórico de canções (⌘Y)"),
+    "Identificando la canción…": ("Identifying the song…", "Identification de la chanson…", "Song wird erkannt …", "A identificar a canção…"),
+    "Identificar canciones automáticamente": ("Identify songs automatically", "Identifier les chansons automatiquement", "Songs automatisch erkennen", "Identificar canções automaticamente"),
+    "Identificar la canción": ("Identify Song", "Identifier la chanson", "Song erkennen", "Identificar a canção"),
+    "Identificar la canción (⌘I)": ("Identify Song (⌘I)", "Identifier la chanson (⌘I)", "Song erkennen (⌘I)", "Identificar a canção (⌘I)"),
+    "Las canciones que suenen en tus emisoras irán apareciendo aquí.": ("Songs played on your stations will show up here.", "Les chansons diffusées sur vos stations apparaîtront ici.", "Die Songs deiner Sender erscheinen hier.", "As canções que tocarem nas suas estações vão aparecendo aqui."),
+    "Las emisoras mandan a veces su eslogan como si fuera una canción. Estos títulos no se guardan en el historial.": ("Stations sometimes send their slogan as if it were a song. These titles aren’t saved to the history.", "Les stations envoient parfois leur slogan comme s’il s’agissait d’une chanson. Ces titres ne sont pas enregistrés dans l’historique.", "Sender schicken manchmal ihren Slogan, als wäre er ein Song. Diese Titel landen nicht im Verlauf.", "Às vezes as estações enviam o seu slogan como se fosse uma canção. Estes títulos não ficam no histórico."),
+    "Marcar como favorita": ("Mark as Favourite", "Ajouter aux favoris", "Als Favorit markieren", "Marcar como favorita"),
+    "Marcar la canción como favorita": ("Mark Song as Favourite", "Ajouter la chanson aux favoris", "Song als Favorit markieren", "Marcar a canção como favorita"),
+    "Mostrar": ("Show", "Afficher", "Anzeigen", "Mostrar"),
+    "Más": ("More", "Plus", "Mehr", "Mais"),
+    "Más opciones": ("More Options", "Plus d’options", "Weitere Optionen", "Mais opções"),
+    "Ningún título ignorado": ("No Ignored Titles", "Aucun titre ignoré", "Keine ignorierten Titel", "Nenhum título ignorado"),
+    "No se ha reconocido la canción": ("The song wasn’t recognised", "Chanson non reconnue", "Song nicht erkannt", "A canção não foi reconhecida"),
+    "No volver a guardar este título en %@": ("Never Save This Title on %@ Again", "Ne plus enregistrer ce titre sur %@", "Diesen Titel bei %@ nicht mehr speichern", "Não voltar a guardar este título em %@"),
+    "Pulsa el corazón mientras suena una canción para guardarla aquí.": ("Click the heart while a song is playing to keep it here.", "Cliquez sur le cœur pendant une chanson pour la garder ici.", "Klicke während eines Songs auf das Herz, um ihn hier zu behalten.", "Clique no coração enquanto uma canção toca para a guardar aqui."),
+    "Quitar de favoritas": ("Remove from Favourites", "Retirer des favoris", "Aus Favoriten entfernen", "Remover das favoritas"),
+    "Retrasar la letra": ("Move Lyrics Later", "Retarder les paroles", "Songtext später", "Atrasar a letra"),
+    "Retrasar la letra medio segundo": ("Move the lyrics half a second later", "Retarder les paroles d’une demi-seconde", "Songtext eine halbe Sekunde später", "Atrasar a letra meio segundo"),
+    "Saltar la cuña de entrada": ("Skip connection ads", "Sauter les pubs de connexion", "Werbung beim Einschalten überspringen", "Saltar os anúncios de entrada"),
+    "Se borran todas las canciones menos las favoritas.": ("Every song except your favourites is deleted.", "Toutes les chansons sont supprimées, sauf les favoris.", "Alle Songs außer den Favoriten werden gelöscht.", "São apagadas todas as canções exceto as favoritas."),
+    "Shazam no está disponible para MacRadio": ("Shazam isn’t available to MacRadio", "Shazam n’est pas disponible pour MacRadio", "Shazam ist für MacRadio nicht verfügbar", "O Shazam não está disponível para o MacRadio"),
+    "Sin favoritas": ("No Favourites", "Aucun favori", "Keine Favoriten", "Sem favoritas"),
+    "Todas": ("All", "Toutes", "Alle", "Todas"),
+    "Títulos ignorados": ("Ignored Titles", "Titres ignorés", "Ignorierte Titel", "Títulos ignorados"),
+    "Títulos ignorados…": ("Ignored Titles…", "Titres ignorés…", "Ignorierte Titel …", "Títulos ignorados…"),
+    "Vaciar": ("Clear", "Vider", "Leeren", "Limpar"),
+    "Vaciar historial…": ("Clear History…", "Vider l’historique…", "Verlauf leeren …", "Limpar histórico…"),
+    "¿Vaciar el historial?": ("Clear the history?", "Vider l’historique ?", "Verlauf leeren?", "Limpar o histórico?"),
+    "Volver a guardar": ("Save Again", "Enregistrer à nouveau", "Wieder speichern", "Voltar a guardar"),
 }
 LANGS = ["en", "fr", "de", "pt"]
+# Literals the scan picks up that never reach the screen through a localized API.
+NOT_UI = {"ES", "±0 s"}
 
 
 def code_keys():
-    pat = re.compile(r'(?:Text|Button|Label|Section|Toggle|TextField|Picker|Link|CommandMenu|ContentUnavailableView|ProgressView|help|note|configurationDisplayName|description|IntentDescription|TypeDisplayRepresentation\(name:|Parameter\(title:|localized:|accessibilityLabel|LocalizedStringKey|return|Window)\s*\(?\s*"((?:[^"\\]|\\.)*)"')
+    pat = re.compile(r'(?<![\w.])(?:Text|Button|Label|Section|Toggle|TextField|Picker|Link|CommandMenu|ContentUnavailableView|ProgressView|help|note|configurationDisplayName|description|IntentDescription|TypeDisplayRepresentation\(name:|Parameter\(title:|localized:|accessibilityLabel|LocalizedStringKey|return|Window)\s*\(?\s*"((?:[^"\\\n]|\\.)*)"')
     keys = set()
     for f in glob.glob(os.path.join(ROOT, "*", "*.swift")):
         if "/Tools/" in f:
             continue
         src = open(f, encoding="utf-8").read()
-        for m in list(pat.finditer(src)) + list(re.finditer(r'(?:\{|\?|:) "([^"]+)"(?: \}|\s*:|\s*$)', src, re.M)):
+        for m in list(pat.finditer(src)) + list(re.finditer(r'(?:\{|\?|:) "([^"\n]+)"(?: \}|[ \t]*:|[ \t]*$)', src, re.M)):
             k = re.sub(r'\\\([^)]*\)', '%@', m.group(1))
+            if k in NOT_UI:
+                continue
             if re.search(r'[A-Za-zÁÉÍÓÚáéíóúñ]', k) and not re.fullmatch(r'[a-z0-9.\-]+', k):
                 keys.add(k)
     return keys

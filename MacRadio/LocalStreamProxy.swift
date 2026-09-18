@@ -119,6 +119,14 @@ private actor Relay {
     private var requestBytes = Data()
     private var sentHeaders = false
     private var finished = false
+    /// Drops the station's intro, when one is known (see `StreamIntro`).
+    private var reframer: IcyReframer?
+    private var reportedIntro = false
+    /// AVPlayer's first connection only asks for two bytes to sniff the format. Held back while
+    /// an intro is dropped, it would stall for as long as the intro takes to arrive, and only
+    /// then would AVPlayer open the connection it actually plays — paying the wait twice. The
+    /// intro is valid audio in the right format, so the probe gets it as is.
+    fileprivate var isProbe = false
     /// Bytes waiting on the socket. Bounded so a stalled client can't grow this without limit.
     private var backlog = 0
     private let maxBacklog = 4 << 20
@@ -181,7 +189,10 @@ private actor Relay {
                 if let data { relay.requestBytes.append(data) }
                 if let range = relay.requestBytes.range(of: Data("\r\n\r\n".utf8)) {
                     let head = String(decoding: relay.requestBytes[..<range.lowerBound], as: UTF8.self)
-                    relay.openOrigin(wantsICYMetadata: head.lowercased().contains("icy-metadata: 1"))
+                    let lower = head.lowercased()
+                    relay.isProbe = lower.components(separatedBy: "\r\n").contains { $0.hasPrefix("range:") && $0.hasSuffix("bytes=0-1") }
+                    proxyLog.notice("client request: \(lower.components(separatedBy: "\r\n").filter { $0.hasPrefix("range") || $0.hasPrefix("icy") || $0.hasPrefix("get") }.joined(separator: " | "), privacy: .public) probe=\(relay.isProbe, privacy: .public)")
+                    relay.openOrigin(wantsICYMetadata: lower.contains("icy-metadata: 1"))
                 } else if isComplete {
                     relay.finish()
                 } else {
@@ -255,8 +266,11 @@ private actor Relay {
     // MARK: Origin callbacks
 
     /// `head` is nil when the origin didn't answer over HTTP.
-    fileprivate func originResponded(head: String?) -> URLSession.ResponseDisposition {
+    fileprivate func originResponded(head: String?, metaint: Int) -> URLSession.ResponseDisposition {
         guard !finished, let head else { return .cancel }
+        if !isProbe, let intro = IntroRegistry.shared.intro(for: originURL.absoluteString) {
+            reframer = IcyReframer(metaint: metaint, intro: intro)
+        }
         if !sentHeaders {
             sentHeaders = true
             send(Data(head.utf8))
@@ -266,7 +280,19 @@ private actor Relay {
 
     fileprivate func originSent(_ data: Data) {
         guard !finished else { return }
-        send(data)
+        guard var reframer else { return send(data) }
+        let out = reframer.feed(data)
+        self.reframer = reframer
+        if !reportedIntro, reframer.skipped || reframer.mismatch {
+            reportedIntro = true
+            if reframer.mismatch {
+                proxyLog.notice("stream no longer starts with the known intro — measuring it again")
+                IntroRegistry.shared.forget(originURL.absoluteString)
+            } else {
+                proxyLog.notice("skipping the station's intro")
+            }
+        }
+        if !out.isEmpty { send(out) }
     }
 
     fileprivate func originEnded(_ error: Error?) {
@@ -293,8 +319,10 @@ private nonisolated final class OriginDelegate: NSObject, URLSessionDataDelegate
     func urlSession(_ session: URLSession, dataTask: URLSessionDataTask,
                     didReceive response: URLResponse,
                     completionHandler: @escaping (URLSession.ResponseDisposition) -> Void) {
-        let head = (response as? HTTPURLResponse).map(Relay.responseHead(for:))
-        completionHandler(relay.assumeIsolated { $0.originResponded(head: head) })
+        let http = response as? HTTPURLResponse
+        let head = http.map(Relay.responseHead(for:))
+        let metaint = http?.value(forHTTPHeaderField: "icy-metaint").flatMap { Int($0) } ?? 0
+        completionHandler(relay.assumeIsolated { $0.originResponded(head: head, metaint: metaint) })
     }
 
     func urlSession(_ session: URLSession, dataTask: URLSessionDataTask, didReceive data: Data) {

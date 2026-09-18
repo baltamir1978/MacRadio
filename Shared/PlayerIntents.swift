@@ -89,3 +89,15 @@ struct ToggleFavoriteIntent: AppIntent {
         return .result()
     }
 }
+
+struct IdentifySongIntent: AudioPlaybackIntent {
+    nonisolated static var title: LocalizedStringResource { "Identificar la canción" }
+    nonisolated static var description: IntentDescription {
+        IntentDescription("Averigua con Shazam qué canción suena en la emisora.")
+    }
+
+    func perform() async throws -> some IntentResult {
+        await PlayerCommand.identify.dispatch()
+        return .result()
+    }
+}

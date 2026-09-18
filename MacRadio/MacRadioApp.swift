@@ -98,6 +98,9 @@ struct PlaybackCommands: Commands {
             }
             .keyboardShortcut("d")
             .disabled(player.historyEntryID == nil)
+            Button("Identificar la canción") { player.identifySong() }
+                .keyboardShortcut("i")
+                .disabled(!player.isPlaying || player.isIdentifying)
             Button("Historial") { openWindow(id: "history") }
                 .keyboardShortcut("y")
         }
