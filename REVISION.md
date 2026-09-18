@@ -26,10 +26,6 @@ Comprobado en este Mac:
 ## Pendiente
 
 ### Por verificar a mano
-- Widget en el escritorio sin foco (modo vibrante) y con aspecto tintado o transparente: que el
-  botón ▶︎/⏸ se vea (icono sobre un disco tenue). `--render-widgets` no reproduce esos modos.
-- − / + y clic en una línea de la letra desde el widget grande: que la letra se mueva en el
-  widget y en la ventana, y que el ajuste se guarde para la emisora.
 - Con ShazamKit activado: que el retraso de título aprendido (traza `… changes its titles …s
   late`) deja la letra a tiempo desde el cambio de canción, en La Indie y Cassette FM.
 - Los botones del widget en el escritorio con la app cerrada: el widget tiene que arrancarla en
