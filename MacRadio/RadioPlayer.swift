@@ -96,6 +96,10 @@ final class RadioPlayer: NSObject, ObservableObject {
     private var missedIdentifications = 0
     /// Whether the song on screen came from ShazamKit rather than from the stream.
     private var songIsFromShazam = false
+    /// When the current song's title change was heard, if we heard it — kept to measure how
+    /// late this station changes its title against ShazamKit's exact position.
+    private var titleChangeHeardAt: Date?
+    private var syncIdentifyTask: Task<Void, Never>?
 
     @Published var volume: Double {
         didSet {
@@ -305,6 +309,8 @@ final class RadioPlayer: NSObject, ObservableObject {
         lastSongKey = nil
         historyEntryID = nil
         songIsFromShazam = false
+        titleChangeHeardAt = nil
+        syncIdentifyTask?.cancel()
     }
 
     // MARK: - Stream
@@ -716,7 +722,11 @@ final class RadioPlayer: NSObject, ObservableObject {
             // The first title after tuning in belongs to a song already under way; only a title
             // that *changes* while we listen marks the real start of a song. A reconnect
             // re-delivers the same title and is caught by the key check above.
-            songStartedAt = sounding
+            // Stations change the title a little after the song really starts — crossfades,
+            // encoder delay — by an amount that belongs to the station, not to the connection.
+            // ShazamKit measures it (see `applyShazamMatch`) and it's taken off from then on.
+            titleChangeHeardAt = sawTitleSinceTuning ? sounding : nil
+            songStartedAt = sounding.addingTimeInterval(-titleLag)
             songStartIsExact = sawTitleSinceTuning
             sawTitleSinceTuning = true
 
@@ -800,7 +810,13 @@ final class RadioPlayer: NSObject, ObservableObject {
         if stationSendsTitles {
             guard let track = currentTrack, let offset = match.offset,
                   Self.sameSong(track, match.title) else { return }
-            songStartedAt = match.matchedAt.addingTimeInterval(-offset + (viaDecoder ? bufferedAhead() : 0))
+            let start = match.matchedAt.addingTimeInterval(-offset + (viaDecoder ? bufferedAhead() : 0))
+            if let heard = titleChangeHeardAt {
+                let lag = heard.timeIntervalSince(start)
+                // A plausible lag only: a match on the previous song's tail would give nonsense.
+                if (-5...30).contains(lag) { learnTitleLag(lag) }
+            }
+            songStartedAt = start
             songStartIsExact = true
             playbackLog.notice("lyrics synced by ShazamKit at \(offset, privacy: .public)s")
             updateNowPlayingInfo()
@@ -831,6 +847,22 @@ final class RadioPlayer: NSObject, ObservableObject {
         updateNowPlayingInfo()
         // Check again in a while: the song will have changed, and the station won't say so.
         if !stationSendsTitles { scheduleAutoIdentify(in: 60) }
+    }
+
+    /// How many seconds after the real start of a song this station changes its title.
+    private var titleLag: Double {
+        guard let station = currentStation else { return 0 }
+        return UserDefaults.standard.double(forKey: "title_lag." + station.streamURL)
+    }
+
+    /// Averaged with what was known, so one odd measurement can't throw the lyrics off.
+    private func learnTitleLag(_ measured: Double) {
+        guard let station = currentStation else { return }
+        let key = "title_lag." + station.streamURL
+        let known = UserDefaults.standard.object(forKey: key) as? Double
+        let lag = known.map { ($0 + measured) / 2 } ?? measured
+        UserDefaults.standard.set(lag, forKey: key)
+        playbackLog.notice("\(station.name, privacy: .public) changes its titles \(measured, privacy: .public)s late (now using \(lag, privacy: .public)s)")
     }
 
     /// Loose title comparison: "Miedo (Directo)" from the station is ShazamKit's "Miedo".
@@ -1090,9 +1122,17 @@ final class RadioPlayer: NSObject, ObservableObject {
         lyrics = found
         lyricsPending = false
         publishState()
-        // Tuned in mid-song: the lyrics can only follow once we know where in the song we are.
-        if found?.synced.isEmpty == false, !songStartIsExact, isPlaying {
-            ShazamService.shared.identify()
+        // ShazamKit says exactly where in the song we are: the only way to follow a song we
+        // tuned into halfway, and the check on a station's late title changes. Asked ~20 s in,
+        // past the crossfade, where it would still hear the previous song.
+        if found?.synced.isEmpty == false, stationSendsTitles, isPlaying {
+            let elapsed = songStartIsExact ? songStartedAt.map { Date().timeIntervalSince($0) } ?? 0 : 20
+            syncIdentifyTask?.cancel()
+            syncIdentifyTask = Task { @MainActor [weak self] in
+                try? await Task.sleep(for: .seconds(max(0, 20 - elapsed)))
+                guard let self, !Task.isCancelled, key == self.lastSongKey, self.isPlaying else { return }
+                ShazamService.shared.identify()
+            }
         }
     }
 

@@ -87,9 +87,16 @@ no *desde cuándo*. El inicio solo se da por bueno si viene de una de estas dos 
    se sintoniza a mitad de una canción con letra sincronizada, se identifica una vez solo para
    eso, sin tocar título ni historial.
 
-Si no hay ninguna, la letra se muestra entera y sin resaltar. Encima de eso, la letra se adelanta
-1 s (se lee justo antes de cantarse) y hay un ajuste por emisora en pasos de 0,5 s, junto al
-título «Letra», que también se aplica al widget.
+El título llega al reproductor en su punto exacto del audio (medido: −0,008 s), pero **las
+emisoras lo cambian tarde**: la canción nueva ya ha empezado, en el fundido o por el retardo del
+codificador. Ese retraso es de la emisora, no de la conexión, así que se mide y se guarda: en cada
+canción con letra sincronizada, a los ~20 s, Shazam da la posición exacta; eso corrige la letra en
+el momento y actualiza el retraso de la emisora (`title_lag.<stream>`, promediado), que se descuenta
+desde el cambio de título en las canciones siguientes.
+
+Si no hay ninguna fuente fiable, la letra se muestra entera y sin resaltar. Encima de todo, la
+letra se adelanta 1 s (se lee justo antes de cantarse) y hay un ajuste manual por emisora en
+pasos de 0,5 s, junto al título «Letra», que también se aplica al widget.
 
 > Se probó a sacar el inicio del *now-playing* de AzuraCast más un retraso medido y guardado por
 > emisora. No sirve: el retraso cambia en cada conexión (con cuña, sin ella, según el búfer) y la
@@ -135,7 +142,8 @@ Trazas con `os.Logger` bajo el subsistema `com.macradio.playback` (Console.app, 
 | `skipping the station's intro` | Se ha descartado la cuña de entrada. |
 | `…: intro of N bytes` | Resultado de medir la cuña (0 = no tiene). |
 | `match: … at …s` | Shazam ha reconocido la canción y dice por dónde va. |
-| `lyrics synced by ShazamKit` | La letra de una canción empezada ya va sincronizada. |
+| `lyrics synced by ShazamKit` | Shazam ha fijado la posición exacta de la canción. |
+| `… changes its titles …s late` | Retraso medido entre el inicio real de la canción y su título. |
 | `ShazamKit error: … 202` | Falta activar ShazamKit en el App ID (ver arriba). |
 
 Para comprobar el diseño del widget sin tocar el escritorio, la app lo dibuja a PNG en todos los
