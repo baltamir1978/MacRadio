@@ -88,6 +88,13 @@ no *desde cuándo*. El inicio solo se da por bueno si viene de una de estas dos 
    se sintoniza a mitad de una canción con letra sincronizada, se identifica una vez solo para
    eso, sin tocar título ni historial.
 
+   Cuando Shazam escucha por una segunda conexión (la escucha directa del reproductor no recibe
+   audio), el servidor abre con una **ráfaga de audio atrasado**: Cadena 100 manda 5,2 s en medio
+   segundo y Kiss FM unos 5 s, y después sigue en tiempo real. ShazamKit da por hecho que el
+   audio suena según llega, así que la ráfaga lo retrasaría; `StreamDecoder` la decodifica pero
+   no se la pasa (el audio deja de adelantarse al reloj → empieza lo que va en tiempo real). A la
+   posición que da Shazam se le suma lo que el reproductor tiene en el búfer.
+
 El título llega al reproductor en su punto exacto del audio (medido: −0,008 s), pero **las
 emisoras lo cambian tarde**: la canción nueva ya ha empezado, en el fundido o por el retardo del
 codificador. Ese retraso es de la emisora, no de la conexión, así que se mide y se guarda: en cada
@@ -118,6 +125,12 @@ letra se adelanta 1 s (se lee justo antes de cantarse). Y siempre se puede ajust
   Doble clic en el valor lo pone a cero. Se aplica también al widget.
 
 Una letra de LRCLIB sin marcas de tiempo no puede seguir la canción; la ventana lo dice.
+
+La letra se busca con el título y el artista que da la emisora; si no aparece, con los dos
+cambiados de orden («Título - Artista»). Luego, las **colaboraciones**: LRCLIB guarda «El Canto
+del Loco y Amaia Montero» con el primer nombre, así que se prueba con el artista principal
+(separando por «y», «&», «,», «feat.», «ft.», «x», «con»…) y, por último, solo con el título,
+aceptando únicamente un resultado de alguno de los artistas nombrados.
 
 > Se probó a sacar el inicio del *now-playing* de AzuraCast más un retraso medido y guardado por
 > emisora. No sirve: el retraso cambia en cada conexión (con cuña, sin ella, según el búfer) y la
@@ -163,6 +176,8 @@ Trazas con `os.Logger` bajo el subsistema `com.macradio.playback` (Console.app, 
 | `skipping the station's intro` | Se ha descartado la cuña de entrada. |
 | `…: intro of N bytes` | Resultado de medir la cuña (0 = no tiene). |
 | `match: … at …s` | Shazam ha reconocido la canción y dice por dónde va. |
+| `second connection: …s of opening burst held back` | Audio atrasado de la ráfaga inicial que no se pasa a Shazam. |
+| `player is …s behind the air` | Lo que el reproductor tiene en el búfer, sumado a la posición de Shazam. |
 | `lyrics synced by ShazamKit` | Shazam ha fijado la posición exacta de la canción. |
 | `… changes its titles …s late` | Retraso medido entre el inicio real de la canción y su título. |
 | `title unchanged past the song's end` | La canción debería haber acabado y el título sigue: se pregunta a Shazam. |

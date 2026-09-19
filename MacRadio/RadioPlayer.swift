@@ -906,7 +906,9 @@ final class RadioPlayer: NSObject, ObservableObject {
                 if wasChecking { scheduleStaleTitleCheck(after: 60) }
                 return
             }
-            let start = match.matchedAt.addingTimeInterval(-offset + (viaDecoder ? bufferedAhead() : 0))
+            let ahead = viaDecoder ? bufferedAhead() : 0
+            if viaDecoder { playbackLog.notice("player is \(ahead, privacy: .public)s behind the air") }
+            let start = match.matchedAt.addingTimeInterval(-offset + ahead)
             if let heard = titleChangeHeardAt {
                 let lag = heard.timeIntervalSince(start)
                 // A plausible lag only: a match on the previous song's tail would give nonsense.

@@ -154,6 +154,9 @@ final class ShazamService: NSObject, ObservableObject, SHSessionDelegate {
             guard self.isListening, !result.title.isEmpty else { return }
             let viaDecoder = self.decoder != nil
             shazamLog.notice("match: \(result.title, privacy: .public) at \(result.offset ?? -1, privacy: .public)s")
+            if let decoder = self.decoder {
+                shazamLog.notice("second connection: \(decoder.skippedBurst, privacy: .public)s of opening burst held back")
+            }
             self.finish()
             self.onMatch?(result, viaDecoder)
         }

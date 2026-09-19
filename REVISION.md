@@ -33,11 +33,22 @@ Comprobado en este Mac:
   canción acabada y la app se quedó en ella. Pasada la duración de la canción (LRCLIB) + 20 s
   con el mismo título, Shazam dice qué suena; si es otra cosa, nombra las canciones hasta que la
   emisora cambie el título, y si no reconoce nada se muestra el logo.
+- Desfase de ~1 s en Cadena 100 (2026-09-19): Bruno tenía que adelantar la letra +1 s. Shazam
+  siempre escucha por la segunda conexión, y esta abre con 5,2 s de audio atrasado en medio
+  segundo; ShazamKit da por hecho que el audio suena según llega. Ahora la ráfaga no se le pasa.
+- Letra de colaboraciones (2026-09-19): «El Canto del Loco y Amaia Montero - Puede ser» no daba
+  letra (LRCLIB no tiene ese artista junto). Se prueba con el artista principal y con el título
+  solo, filtrando por los artistas nombrados; comprobado con LRCLIB real (57 líneas).
 
 ## Pendiente
 
 ### Por verificar a mano
 - Que el ajuste vuelva a ±0 al cambiar de canción con Shazam activo, y ↺ en ventana y widget.
+- Que la letra de Cadena 100 vaya a tiempo sin tocar − / +. En los registros, el retraso de
+  títulos aprendido (`changes its titles …s late`, antes 3,0–3,6 s) debería subir en lo que
+  retrasaba la ráfaga.
+- Por qué la escucha directa del reproductor (`AudioStreamTap`) siempre llega vacía («tap
+  starved»): con ella Shazam oiría exactamente lo que suena, sin segunda conexión.
 - La próxima vez que una emisora deje un título caducado: que salga la canción de Shazam (o el
   logo) ~20 s después de acabar la anterior, y que al volver el título de la emisora no se
   duplique en el historial.

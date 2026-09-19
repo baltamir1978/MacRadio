@@ -15,14 +15,33 @@ nonisolated enum LyricsService {
 
     /// Looks the song up as given and, if that finds nothing, with title and artist swapped:
     /// some stations send "Title - Artist", and until the cover lookup has set the order right
-    /// the two can't be told apart.
+    /// the two can't be told apart. Then collaborations: LRCLIB files "El Canto del Loco y Amaia
+    /// Montero" under the first name, or under both spelt otherwise, so the first name alone and
+    /// finally the title alone are tried — the latter only taking a hit by one of the artists.
     static func lookup(track: String, artist: String?) async -> Outcome {
         let outcome = await search(track: track, artist: artist)
         guard case .notFound = outcome, let artist, !artist.isEmpty else { return outcome }
-        return await search(track: artist, artist: track)
+        let swapped = await search(track: artist, artist: track)
+        guard case .notFound = swapped else { return swapped }
+        let names = artistNames(artist)
+        if names.count > 1 {
+            let main = await search(track: track, artist: names[0], byAnyOf: names)
+            guard case .notFound = main else { return main }
+        }
+        return await search(track: track, artist: nil, byAnyOf: names)
     }
 
-    private static func search(track: String, artist: String?) async -> Outcome {
+    /// "A y B", "A & B", "A feat. B", "A, B", "A x B" → ["A", "B"].
+    static func artistNames(_ artist: String) -> [String] {
+        let separator = #"\s*(?:,|&|\+|/|\b(?:y|and|con|with|x|vs|feat|ft|featuring)\b\.?)\s*"#
+        return artist.replacingOccurrences(of: separator, with: "\u{1F}", options: [.regularExpression, .caseInsensitive])
+            .components(separatedBy: "\u{1F}")
+            .map { $0.trimmingCharacters(in: .whitespaces) }
+            .filter { !$0.isEmpty }
+    }
+
+    /// `byAnyOf`: searching by title alone, a hit counts only if it's by one of these artists.
+    private static func search(track: String, artist: String?, byAnyOf names: [String] = []) async -> Outcome {
         guard var comps = URLComponents(string: "https://lrclib.net/api/search") else { return .notFound }
         let title = stripDecorations(track).trimmingCharacters(in: .whitespaces)
         var query = [URLQueryItem(name: "track_name", value: title.isEmpty ? track : title)]
@@ -40,7 +59,7 @@ nonisolated enum LyricsService {
             return .failed
         }
         guard let hits = try? JSONDecoder().decode([Hit].self, from: data) else { return .failed }
-        guard let best = pick(from: hits, track: track, artist: artist) else { return .notFound }
+        guard let best = pick(from: hits, track: track, byAnyOf: names) else { return .notFound }
 
         if best.instrumental == true {
             return .found(SongLyrics(synced: [], plain: [], isInstrumental: true, duration: best.duration))
@@ -57,10 +76,15 @@ nonisolated enum LyricsService {
     /// Prefers an entry with synced lyrics whose title really matches. Radio metadata is often
     /// sloppy ("Artist - Title (Radio Edit)"), so the search is loose and the match here is
     /// what keeps a random song's lyrics off the screen. Very short durations are junk uploads.
-    private static func pick(from hits: [Hit], track: String, artist: String?) -> Hit? {
+    private static func pick(from hits: [Hit], track: String, byAnyOf names: [String]) -> Hit? {
         let wanted = normalize(stripDecorations(track))
+        let artists = names.map(normalize).filter { !$0.isEmpty }
         let plausible = hits.filter { hit in
             guard (hit.duration ?? 120) > 45 else { return false }
+            if !artists.isEmpty {
+                let by = normalize(hit.artistName ?? "")
+                guard !by.isEmpty, artists.contains(where: { by.contains($0) || $0.contains(by) }) else { return false }
+            }
             let title = normalize(stripDecorations(hit.trackName ?? ""))
             return !title.isEmpty && (title.contains(wanted) || wanted.contains(title))
         }
