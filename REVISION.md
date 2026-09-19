@@ -39,10 +39,16 @@ Comprobado en este Mac:
 - Letra de colaboraciones (2026-09-19): «El Canto del Loco y Amaia Montero - Puede ser» no daba
   letra (LRCLIB no tiene ese artista junto). Se prueba con el artista principal y con el título
   solo, filtrando por los artistas nombrados; comprobado con LRCLIB real (57 líneas).
+- Widget sin nada sonando (2026-09-19): se quedaba con la última canción y su letra, también con
+  la app cerrada. Ahora, en pausa o sin emisora, la carátula es el icono de la app, la letra queda
+  en blanco y se lee la emisora que ▶︎ volvería a poner; al salir, la app pausa antes para que el
+  widget lo sepa. Logos a sangre, sin el marco blanco; los de fondo transparente van enteros con
+  un margen, sobre oscuro si son claros (Kiss FM). Dibujado con `--render-widgets` e instalado.
 
 ## Pendiente
 
 ### Por verificar a mano
+- Que al salir de la app sonando, el widget pase al icono de la app y la letra en blanco.
 - Que el ajuste vuelva a ±0 al cambiar de canción con Shazam activo, y ↺ en ventana y widget.
 - Que la letra de Cadena 100 vaya a tiempo sin tocar − / +. En los registros, el retraso de
   títulos aprendido (`changes its titles …s late`, antes 3,0–3,6 s) debería subir en lo que

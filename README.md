@@ -19,7 +19,8 @@ escritorio** desde el que elegir emisora y ver lo que suena.
 - 🕑 **Historial** con favoritas (♥), búsqueda y lista de títulos ignorados (eslóganes de emisora).
 - 🔇 **Salto de la cuña de entrada** que algunas emisoras ponen a cada oyente al conectarse.
 - 🧩 **Widget** de escritorio en cuatro tamaños, con botones para elegir emisora, pausar, pasar
-  de emisora, marcar favorita e identificar la canción.
+  de emisora, marcar favorita e identificar la canción. Logos y carátulas a sangre; sin nada
+  sonando (pausa o app cerrada) muestra el icono de la app y la letra en blanco.
 - 📋 **Barra de menús** con minirreproductor; **teclas multimedia** y **Centro de control**.
 - ⚡️ **Atajos**: escuchar emisora, reproducir/pausar, siguiente/anterior, favorita, identificar.
 - 🌍 Español, inglés, francés, alemán y portugués. ♿️ VoiceOver, contraste AA, *Reducir movimiento*.
@@ -185,7 +186,8 @@ Trazas con `os.Logger` bajo el subsistema `com.macradio.playback` (Console.app, 
 | `ShazamKit error: … 202` | Falta activar ShazamKit en el App ID (ver arriba). |
 
 Para comprobar el diseño del widget sin tocar el escritorio, la app lo dibuja a PNG en todos los
-tamaños, en claro y oscuro (dentro de su contenedor, por el sandbox):
+tamaños, en claro y oscuro, con el estado actual y con su contrario (sonando / en pausa), dentro
+de su contenedor por el sandbox:
 
 ```sh
 /Applications/MacRadio.app/Contents/MacOS/MacRadio --render-widgets ~/Library/Containers/Altamirano.MacRadio/Data/tmp/widgets

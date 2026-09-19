@@ -70,7 +70,8 @@ private struct SmallLayout: View {
                 PlayPauseButton(isPlaying: entry.snapshot?.isPlaying ?? false, size: 30)
             }
             Spacer(minLength: 0)
-            SongText(snapshot: entry.snapshot, titleFont: .system(size: 13, weight: .semibold), titleLines: 2)
+            SongText(snapshot: entry.snapshot, titleFont: .system(size: 13, weight: .semibold), titleLines: 2,
+                     saysPaused: true)
         }
     }
 }
@@ -156,35 +157,85 @@ private struct ExtraLargeLayout: View {
 
 // MARK: - Pieces
 
-/// Album cover, full-bleed; a station logo sits on white with a little air, as in the app.
+/// Album cover or station logo, filling the tile. With nothing playing — the app closed, or
+/// paused — the app's own icon takes the place, so the last song doesn't linger.
 struct ArtworkView: View {
     let snapshot: NowPlayingSnapshot?
     let size: CGFloat
 
     var body: some View {
         let image = SharedStore.imageURL(named: snapshot?.artworkFile).flatMap(NSImage.init(contentsOf:))
-        let isCover = snapshot?.artworkIsCover ?? false
         ZStack {
-            if let image {
-                if isCover {
-                    Image(nsImage: image).resizable().widgetAccentedRenderingMode(.fullColor)
-                        .aspectRatio(contentMode: .fill)
+            if let snapshot, snapshot.isPlaying {
+                if let image {
+                    LogoImage(image: image)
                 } else {
-                    Color.white
-                    Image(nsImage: image).resizable().widgetAccentedRenderingMode(.fullColor)
-                        .aspectRatio(contentMode: .fit)
-                        .padding(size * 0.08)
+                    InitialsTile(name: snapshot.stationName, size: size)
                 }
-            } else if let name = snapshot?.stationName {
-                InitialsTile(name: name, size: size)
             } else {
-                Color.mintSurface
-                Image(systemName: "radio").font(.system(size: size * 0.4)).foregroundStyle(Color.brand)
+                Image("AppArtwork").resizable().widgetAccentedRenderingMode(.fullColor)
+                    .aspectRatio(contentMode: .fill)
             }
         }
         .frame(width: size, height: size)
         .clipShape(RoundedRectangle(cornerRadius: size * 0.16, style: .continuous))
         .accessibilityHidden(true)
+    }
+}
+
+/// A cover or logo edge to edge, as the station draws it. A square one fills the tile; a wide
+/// or tall one is fitted whole rather than cropped, on white. A logo with a transparent
+/// background has no edge of its own, so it gets a little air, and a dark backing when it is
+/// drawn in light colours (Kiss FM's white lettering would vanish on white).
+private struct LogoImage: View {
+    let image: NSImage
+
+    var body: some View {
+        let ratio = image.size.height > 0 ? image.size.width / image.size.height : 1
+        let look = LogoLook(image)
+        let fills = !look.isTransparent && (0.8...1.25).contains(ratio)
+        GeometryReader { proxy in
+            ZStack {
+                look.isLight ? Color(white: 0.1) : Color.white
+                Image(nsImage: image).resizable().widgetAccentedRenderingMode(.fullColor)
+                    .aspectRatio(contentMode: fills ? .fill : .fit)
+                    .padding(look.isTransparent ? proxy.size.width * 0.08 : 0)
+                    .frame(width: proxy.size.width, height: proxy.size.height)
+            }
+        }
+    }
+}
+
+/// What a logo looks like, from a 24×24 sample: whether much of it is see-through, and whether
+/// what isn't is mostly near-white.
+private struct LogoLook {
+    var isTransparent = false
+    var isLight = false
+
+    init(_ image: NSImage) {
+        guard let cg = image.cgImage(forProposedRect: nil, context: nil, hints: nil) else { return }
+        let n = 24
+        var pixels = [UInt8](repeating: 0, count: n * n * 4)
+        let drawn: Bool = pixels.withUnsafeMutableBytes { buffer in
+            guard let ctx = CGContext(data: buffer.baseAddress, width: n, height: n, bitsPerComponent: 8,
+                                      bytesPerRow: n * 4, space: CGColorSpace(name: CGColorSpace.sRGB)!,
+                                      bitmapInfo: CGImageAlphaInfo.premultipliedLast.rawValue) else { return false }
+            ctx.draw(cg, in: CGRect(x: 0, y: 0, width: n, height: n))
+            return true
+        }
+        guard drawn else { return }
+        var clear = 0, opaque = 0, light = 0
+        for i in 0..<(n * n) {
+            let a = Double(pixels[i * 4 + 3]) / 255
+            if a < 0.5 { clear += 1; continue }
+            opaque += 1
+            let r = Double(pixels[i * 4]) / 255 / a
+            let g = Double(pixels[i * 4 + 1]) / 255 / a
+            let b = Double(pixels[i * 4 + 2]) / 255 / a
+            if 0.2126 * r + 0.7152 * g + 0.0722 * b > 0.85 { light += 1 }
+        }
+        isTransparent = clear * 10 > n * n
+        isLight = isTransparent && light * 4 > opaque
     }
 }
 
@@ -208,8 +259,12 @@ private struct StatusLine: View {
 
     var body: some View {
         HStack(spacing: 4) {
-            if let snapshot {
-                Image(systemName: snapshot.isPlaying ? "dot.radiowaves.left.and.right" : "pause.fill")
+            if let snapshot, !snapshot.isPlaying {
+                // The station's name is right below, where the song would be.
+                Image(systemName: "pause.fill").font(.system(size: 9, weight: .bold))
+                Text("En pausa").lineLimit(1)
+            } else if let snapshot {
+                Image(systemName: "dot.radiowaves.left.and.right")
                     .font(.system(size: 9, weight: .bold))
                 Text(snapshot.stationName).lineLimit(1)
                 Text("·")
@@ -224,8 +279,7 @@ private struct StatusLine: View {
     }
 
     private func statusText(_ s: NowPlayingSnapshot) -> LocalizedStringKey {
-        if s.isPlaying && s.isLoading { return "Conectando…" }
-        return s.isPlaying ? "En directo" : "En pausa"
+        s.isLoading ? "Conectando…" : "En directo"
     }
 }
 
@@ -233,10 +287,23 @@ private struct SongText: View {
     let snapshot: NowPlayingSnapshot?
     let titleFont: Font
     let titleLines: Int
+    /// Says «En pausa» under the station when paused; the sizes with a status line already do.
+    var saysPaused = false
 
     var body: some View {
         VStack(alignment: .leading, spacing: 2) {
-            if let snapshot, snapshot.hasSong {
+            if let snapshot, !snapshot.isPlaying {
+                // Paused or the app closed: the station the ▶︎ button would bring back.
+                Text(snapshot.stationName)
+                    .font(titleFont)
+                    .lineLimit(titleLines)
+                if saysPaused {
+                    Text("En pausa")
+                        .font(.system(size: 12))
+                        .foregroundStyle(.secondary)
+                        .lineLimit(1)
+                }
+            } else if let snapshot, snapshot.hasSong {
                 Text(snapshot.track ?? "")
                     .font(titleFont)
                     .lineLimit(titleLines)
@@ -294,7 +361,7 @@ private struct PlayPauseButton: View {
 
 /// The heart only means something while the station names a song.
 private func favoriteState(_ snapshot: NowPlayingSnapshot?) -> Bool? {
-    guard let snapshot, snapshot.hasSong else { return nil }
+    guard let snapshot, snapshot.isPlaying, snapshot.hasSong else { return nil }
     return snapshot.isFavorite
 }
 
@@ -368,10 +435,7 @@ private struct StationLogoTile: View {
     var body: some View {
         ZStack {
             if let image = SharedStore.imageURL(named: station.logoFile).flatMap(NSImage.init(contentsOf:)) {
-                Color.white
-                Image(nsImage: image).resizable().widgetAccentedRenderingMode(.fullColor)
-                    .aspectRatio(contentMode: .fit)
-                    .padding(size * 0.08)
+                LogoImage(image: image)
             } else {
                 InitialsTile(name: station.name, size: size)
             }
@@ -438,7 +502,7 @@ struct LyricsBlock: View {
                     .foregroundStyle(Color.brand)
                     .textCase(.uppercase)
                 Spacer(minLength: 8)
-                if let snapshot = entry.snapshot, isFollowing(snapshot) {
+                if let snapshot = entry.snapshot, snapshot.isPlaying, isFollowing(snapshot) {
                     LyricsAdjuster(offset: snapshot.lyricsOffset ?? 0)
                 }
             }
@@ -453,7 +517,10 @@ struct LyricsBlock: View {
 
     @ViewBuilder
     private var content: some View {
-        if let snapshot = entry.snapshot, snapshot.hasSong {
+        if entry.snapshot?.isPlaying != true {
+            // Nothing playing: blank, rather than the words of the last song.
+            EmptyView()
+        } else if let snapshot = entry.snapshot, snapshot.hasSong {
             if let lyrics = snapshot.lyrics, lyrics.isInstrumental {
                 note("Instrumental ♪")
             } else if let lyrics = snapshot.lyrics, !lyrics.isEmpty {

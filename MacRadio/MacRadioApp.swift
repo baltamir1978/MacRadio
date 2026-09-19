@@ -71,6 +71,13 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     /// The radio keeps playing with the window closed: the menu bar, the widget and the media
     /// keys all still drive it.
     func applicationShouldTerminateAfterLastWindowClosed(_ sender: NSApplication) -> Bool { false }
+
+    /// Quitting while the radio plays would leave the widget showing that song, and its lyrics
+    /// running on, with nothing playing. Pausing first tells it the radio has stopped.
+    func applicationWillTerminate(_ notification: Notification) {
+        let player = RadioPlayer.shared
+        if player.isPlaying || player.isReconnecting { player.pause() }
+    }
 }
 
 /// The Controls menu. No shortcut on play/pause: a bare Space as a menu key equivalent would

@@ -1,0 +1,18 @@
+{
+  "images" : [
+    {
+      "filename" : "app-artwork.png",
+      "idiom" : "universal",
+      "scale" : "1x"
+    },
+    {
+      "filename" : "app-artwork@2x.png",
+      "idiom" : "universal",
+      "scale" : "2x"
+    }
+  ],
+  "info" : {
+    "author" : "xcode",
+    "version" : 1
+  }
+}

@@ -25,6 +25,15 @@ enum WidgetSnapshotRenderer {
             entries.append(("live", RadioEntry(date: Date(), snapshot: live,
                                                stations: SharedStore.loadStations(), lyricIndex: index)))
         }
+        // The live state flipped, so both the playing and the paused look get drawn.
+        if var other = SharedStore.loadNowPlaying() {
+            other.isPlaying.toggle()
+            other.isLoading = false
+            let index = other.songStartedAt.flatMap { other.lyrics?.lineIndex(at: Date().timeIntervalSince($0)) }
+            entries.append((other.isPlaying ? "playing" : "paused",
+                            RadioEntry(date: Date(), snapshot: other,
+                                       stations: SharedStore.loadStations(), lyricIndex: index)))
+        }
         entries.append(("empty", RadioEntry(date: Date(), snapshot: nil,
                                             stations: SharedStore.loadStations(), lyricIndex: nil)))
 
