@@ -43,13 +43,14 @@ nonisolated enum LyricsService {
         guard let best = pick(from: hits, track: track, artist: artist) else { return .notFound }
 
         if best.instrumental == true {
-            return .found(SongLyrics(synced: [], plain: [], isInstrumental: true))
+            return .found(SongLyrics(synced: [], plain: [], isInstrumental: true, duration: best.duration))
         }
         let synced = best.syncedLyrics.map(parseLRC) ?? []
         let plain = (best.plainLyrics ?? "")
             .components(separatedBy: .newlines)
             .map { $0.trimmingCharacters(in: .whitespaces) }
-        let lyrics = SongLyrics(synced: synced, plain: trimBlankEdges(plain), isInstrumental: false)
+        let lyrics = SongLyrics(synced: synced, plain: trimBlankEdges(plain), isInstrumental: false,
+                                duration: best.duration)
         return lyrics.isEmpty ? .notFound : .found(lyrics)
     }
 

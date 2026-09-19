@@ -29,11 +29,18 @@ Comprobado en este Mac:
   la cifra del widget (el clic en una línea deja cifras como +1,3 s que los pasos de 0,5 no
   devuelven a cero). Cuando Shazam ha situado una canción en la emisora, el ajuste vuelve a ±0
   en cada canción nueva y al llegar cada posición de Shazam: el ajuste a mano es de esa canción.
+- Títulos que se quedan (2026-09-19): Cadena 100 siguió mandando «Olivia Dean - So easy» con la
+  canción acabada y la app se quedó en ella. Pasada la duración de la canción (LRCLIB) + 20 s
+  con el mismo título, Shazam dice qué suena; si es otra cosa, nombra las canciones hasta que la
+  emisora cambie el título, y si no reconoce nada se muestra el logo.
 
 ## Pendiente
 
 ### Por verificar a mano
 - Que el ajuste vuelva a ±0 al cambiar de canción con Shazam activo, y ↺ en ventana y widget.
+- La próxima vez que una emisora deje un título caducado: que salga la canción de Shazam (o el
+  logo) ~20 s después de acabar la anterior, y que al volver el título de la emisora no se
+  duplique en el historial.
 - Cuánto se aleja la letra del audio en el widget frente a la ventana: WidgetKit decide cuándo
   pinta cada entrada de la línea de tiempo y puede llegar tarde.
 - Cuña de La Indie cuando rota el anuncio: todos empiezan con la misma sintonía, así que el

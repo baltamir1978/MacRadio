@@ -133,6 +133,20 @@ final class RadioPlayer: NSObject, ObservableObject {
     /// late this station changes its title against ShazamKit's exact position.
     private var titleChangeHeardAt: Date?
     private var syncIdentifyTask: Task<Void, Never>?
+    /// A title the station kept sending after its song was over (Cadena 100 went a whole song
+    /// without renaming it). While set, a re-delivery of it is ignored and ShazamKit names what's
+    /// on air, as on a station that sends no titles, until the station sends a new title.
+    private var staleTitleKey: String?
+    private var staleTitleTask: Task<Void, Never>?
+    /// ShazamKit was asked because the song on screen should be over by now.
+    private var checkingStaleTitle = false
+    /// Past the song's length, plus this, the title is checked; songs without a known length
+    /// are taken to be `assumedSongLength` long.
+    private static let staleTitleGrace: Double = 20
+    private static let assumedSongLength: Double = 300
+
+    /// Whether ShazamKit, not the stream, names the songs right now.
+    private var shazamNamesSongs: Bool { !stationSendsTitles || staleTitleKey != nil }
 
     @Published var volume: Double {
         didSet {
@@ -266,6 +280,8 @@ final class RadioPlayer: NSObject, ObservableObject {
         stationSendsTitles = false
         missedIdentifications = 0
         shazamSyncsLyrics = false
+        staleTitleKey = nil
+        checkingStaleTitle = false
         lyricsOffset = UserDefaults.standard.double(forKey: "lyrics_offset." + station.streamURL)
         ShazamService.shared.cancel()
         autoIdentifyTask?.cancel()
@@ -315,6 +331,8 @@ final class RadioPlayer: NSObject, ObservableObject {
         intendsToPlay = false
         ShazamService.shared.cancel()
         autoIdentifyTask?.cancel()
+        staleTitleTask?.cancel()
+        checkingStaleTitle = false
         cancelReconnect()
         teardownStream()
         isPlaying = false
@@ -345,6 +363,7 @@ final class RadioPlayer: NSObject, ObservableObject {
         songIsFromShazam = false
         titleChangeHeardAt = nil
         syncIdentifyTask?.cancel()
+        staleTitleTask?.cancel()
     }
 
     // MARK: - Stream
@@ -746,10 +765,23 @@ final class RadioPlayer: NSObject, ObservableObject {
                 clearStreamMetadata()
                 return
             }
+            let key = "\(artist ?? "")|\(track)".lowercased()
+            // The title that outlived its song, sent again (a reconnect): ShazamKit carries on.
+            guard key != staleTitleKey else { return }
             stationSendsTitles = true
             autoIdentifyTask?.cancel()
-            let key = "\(artist ?? "")|\(track)".lowercased()
             guard key != lastSongKey else { return }
+            if staleTitleKey != nil {
+                staleTitleKey = nil
+                checkingStaleTitle = false
+                // The station catching up with the song ShazamKit already put on screen.
+                if songIsFromShazam, let shown = currentTrack, Self.sameSong(shown, track) {
+                    songIsFromShazam = false
+                    lastSongKey = key
+                    scheduleStaleTitleCheck()
+                    return
+                }
+            }
             songIsFromShazam = false
             lastSongKey = key
             if shazamSyncsLyrics { zeroLyricsOffset() }
@@ -773,8 +805,31 @@ final class RadioPlayer: NSObject, ObservableObject {
             }
             resolveArtwork(key: key, track: track, artist: artist)
             resolveLyrics(key: key, track: track, artist: artist)
+            scheduleStaleTitleCheck()
             updateNowPlayingInfo()
             return
+        }
+    }
+
+    /// Asks ShazamKit what's on air once the song on screen should be over: the station may
+    /// have stopped renaming its songs. With no `delay`, that's the song's length past its start.
+    private func scheduleStaleTitleCheck(after delay: TimeInterval? = nil) {
+        staleTitleTask?.cancel()
+        guard !shazamNamesSongs, let key = lastSongKey, let start = songStartedAt else { return }
+        let length = lyrics?.duration ?? Self.assumedSongLength
+        let wait = delay ?? start.addingTimeInterval(length + Self.staleTitleGrace).timeIntervalSinceNow
+        staleTitleTask = Task { @MainActor [weak self] in
+            try? await Task.sleep(for: .seconds(max(5, wait)))
+            guard let self, !Task.isCancelled, key == self.lastSongKey, self.isPlaying,
+                  !self.shazamNamesSongs else { return }
+            // Busy with the in-song check: its result wouldn't say whether the song is over.
+            guard !ShazamService.shared.isListening else {
+                self.scheduleStaleTitleCheck(after: 15)
+                return
+            }
+            playbackLog.notice("title unchanged past the song's end — asking ShazamKit")
+            self.checkingStaleTitle = true
+            ShazamService.shared.identify()
         }
     }
 
@@ -840,11 +895,17 @@ final class RadioPlayer: NSObject, ObservableObject {
         guard let station = currentStation, isPlaying else { return }
         missedIdentifications = 0
         // On a station that names its songs, ShazamKit was only asked for the position in the
-        // song (see `finishLyrics`). Take the offset if it heard the same song; leave the
-        // station's title, cover and history entry alone either way.
-        if stationSendsTitles {
-            guard let track = currentTrack, let offset = match.offset,
-                  Self.sameSong(track, match.title) else { return }
+        // song (see `finishLyrics`), or whether the song is over (`scheduleStaleTitleCheck`).
+        // Take the offset if it heard the same song; leave the station's title, cover and
+        // history entry alone — unless the song is over and the title stayed.
+        let stillOnStationSong = !songIsFromShazam && currentTrack.map { Self.sameSong($0, match.title) } == true
+        if stationSendsTitles, staleTitleKey == nil, !(checkingStaleTitle && !stillOnStationSong) {
+            let wasChecking = checkingStaleTitle
+            checkingStaleTitle = false
+            guard stillOnStationSong, let offset = match.offset else {
+                if wasChecking { scheduleStaleTitleCheck(after: 60) }
+                return
+            }
             let start = match.matchedAt.addingTimeInterval(-offset + (viaDecoder ? bufferedAhead() : 0))
             if let heard = titleChangeHeardAt {
                 let lag = heard.timeIntervalSince(start)
@@ -856,8 +917,16 @@ final class RadioPlayer: NSObject, ObservableObject {
             shazamSyncsLyrics = true
             zeroLyricsOffset()
             playbackLog.notice("lyrics synced by ShazamKit at \(offset, privacy: .public)s")
+            // Still on it past its expected end (a longer version): look again in a minute.
+            scheduleStaleTitleCheck(after: wasChecking ? 60 : nil)
             updateNowPlayingInfo()
             return
+        }
+        if checkingStaleTitle {
+            // Another song on air while the station still names the last one.
+            checkingStaleTitle = false
+            staleTitleKey = lastSongKey
+            playbackLog.notice("station title is stale — ShazamKit names the songs until it changes")
         }
         let key = "\(match.artist ?? "")|\(match.title)".lowercased()
         let isNewSong = key != lastSongKey
@@ -887,7 +956,7 @@ final class RadioPlayer: NSObject, ObservableObject {
         }
         updateNowPlayingInfo()
         // Check again in a while: the song will have changed, and the station won't say so.
-        if !stationSendsTitles { scheduleAutoIdentify(in: 60) }
+        if shazamNamesSongs { scheduleAutoIdentify(in: 60) }
     }
 
     /// How many seconds after the real start of a song this station changes its title.
@@ -915,7 +984,19 @@ final class RadioPlayer: NSObject, ObservableObject {
     /// Nothing recognised: talk, an ad, or a song ShazamKit doesn't know. One miss may be a
     /// jingle over the end of the song; two in a row and the song on screen is surely over.
     private func handleNoMatch() {
-        guard !stationSendsTitles else { return }
+        if checkingStaleTitle {
+            // Talk or ads under a title whose song is over: back to the station until
+            // ShazamKit hears a song or the station names one.
+            checkingStaleTitle = false
+            staleTitleKey = lastSongKey
+            playbackLog.notice("station title is stale and nothing recognised — showing the station")
+            clearSong()
+            showStationLogo()
+            updateNowPlayingInfo()
+            scheduleAutoIdentify(in: 45)
+            return
+        }
+        guard shazamNamesSongs else { return }
         missedIdentifications += 1
         if missedIdentifications >= 2, songIsFromShazam {
             clearSong()
@@ -927,11 +1008,11 @@ final class RadioPlayer: NSObject, ObservableObject {
 
     private func scheduleAutoIdentify(in seconds: TimeInterval) {
         autoIdentifyTask?.cancel()
-        guard autoIdentify, !stationSendsTitles else { return }
+        guard autoIdentify, shazamNamesSongs else { return }
         autoIdentifyTask = Task { @MainActor [weak self] in
             try? await Task.sleep(for: .seconds(seconds))
             guard let self, !Task.isCancelled, self.intendsToPlay, self.isPlaying,
-                  !self.stationSendsTitles else { return }
+                  self.shazamNamesSongs else { return }
             self.identifySong()
         }
     }
@@ -1166,7 +1247,8 @@ final class RadioPlayer: NSObject, ObservableObject {
         // ShazamKit says exactly where in the song we are: the only way to follow a song we
         // tuned into halfway, and the check on a station's late title changes. Asked ~20 s in,
         // past the crossfade, where it would still hear the previous song.
-        if found?.synced.isEmpty == false, stationSendsTitles, isPlaying {
+        scheduleStaleTitleCheck()
+        if found?.synced.isEmpty == false, !shazamNamesSongs, isPlaying {
             let elapsed = songStartIsExact ? songStartedAt.map { Date().timeIntervalSince($0) } ?? 0 : 20
             syncIdentifyTask?.cancel()
             syncIdentifyTask = Task { @MainActor [weak self] in

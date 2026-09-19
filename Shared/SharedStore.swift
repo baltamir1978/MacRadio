@@ -210,6 +210,8 @@ nonisolated struct SongLyrics: Codable, Sendable, Equatable {
     var synced: [LyricLine]
     var plain: [String]
     var isInstrumental: Bool
+    /// The song's length in seconds, when the source knows it.
+    var duration: Double? = nil
 
     var isEmpty: Bool { synced.isEmpty && plain.isEmpty }
 

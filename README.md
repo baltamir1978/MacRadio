@@ -14,7 +14,8 @@ escritorio** desde el que elegir emisora y ver lo que suena.
 - 🖼️ **Carátula** del disco vía iTunes Search; si la emisora no manda título, vía **Shazam**.
 - 📝 **Letra sincronizada** (LRCLIB), línea a línea, en la ventana y en el widget grande.
 - 🔎 **Shazam** sobre el propio stream, sin micrófono, en cualquier salida de audio. En las
-  emisoras que no dicen qué suena (Kiss FM) identifica solo cada minuto.
+  emisoras que no dicen qué suena (Kiss FM) identifica solo cada minuto, y también cuando una
+  emisora deja de cambiar el título (ver «Títulos que se quedan»).
 - 🕑 **Historial** con favoritas (♥), búsqueda y lista de títulos ignorados (eslóganes de emisora).
 - 🔇 **Salto de la cuña de entrada** que algunas emisoras ponen a cada oyente al conectarse.
 - 🧩 **Widget** de escritorio en cuatro tamaños, con botones para elegir emisora, pausar, pasar
@@ -94,6 +95,19 @@ canción con letra sincronizada, a los ~20 s, Shazam da la posición exacta; eso
 el momento y actualiza el retraso de la emisora (`title_lag.<stream>`, promediado), que se descuenta
 desde el cambio de título en las canciones siguientes.
 
+### Títulos que se quedan
+
+Algunas emisoras dejan de cambiar el título: Cadena 100 siguió mandando una canción ya acabada
+durante toda la siguiente. Por eso, si pasa la duración de la canción (la da LRCLIB; 5 min si
+no se sabe) más 20 s y el título no ha cambiado, se pregunta a Shazam:
+
+- **Otra canción**: el título de la emisora se da por caducado, se ignora aunque vuelva a llegar
+  y Shazam nombra las canciones (pantalla, historial, widget) cada minuto, como en Kiss FM,
+  hasta que la emisora mande un título nuevo. Si ese título es la canción que ya ha puesto
+  Shazam, se queda como está, sin repetirla en el historial.
+- **Nada reconocido** (anuncios, locutor): se vuelve al logo de la emisora y se sigue probando.
+- **La misma canción** (una versión más larga): se vuelve a mirar al cabo de un minuto.
+
 Si no hay ninguna fuente fiable, la letra se muestra entera y sin resaltar. Encima de todo, la
 letra se adelanta 1 s (se lee justo antes de cantarse). Y siempre se puede ajustar a mano:
 
@@ -151,6 +165,8 @@ Trazas con `os.Logger` bajo el subsistema `com.macradio.playback` (Console.app, 
 | `match: … at …s` | Shazam ha reconocido la canción y dice por dónde va. |
 | `lyrics synced by ShazamKit` | Shazam ha fijado la posición exacta de la canción. |
 | `… changes its titles …s late` | Retraso medido entre el inicio real de la canción y su título. |
+| `title unchanged past the song's end` | La canción debería haber acabado y el título sigue: se pregunta a Shazam. |
+| `station title is stale — …` | Suena otra cosa: Shazam nombra las canciones hasta el próximo título. |
 | `ShazamKit error: … 202` | Falta activar ShazamKit en el App ID (ver arriba). |
 
 Para comprobar el diseño del widget sin tocar el escritorio, la app lo dibuja a PNG en todos los
