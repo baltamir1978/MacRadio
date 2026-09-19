@@ -141,6 +141,8 @@ T = {
     "No volver a guardar este título en %@": ("Never Save This Title on %@ Again", "Ne plus enregistrer ce titre sur %@", "Diesen Titel bei %@ nicht mehr speichern", "Não voltar a guardar este título em %@"),
     "Pulsa el corazón mientras suena una canción para guardarla aquí.": ("Click the heart while a song is playing to keep it here.", "Cliquez sur le cœur pendant une chanson pour la garder ici.", "Klicke während eines Songs auf das Herz, um ihn hier zu behalten.", "Clique no coração enquanto uma canção toca para a guardar aqui."),
     "Quitar de favoritas": ("Remove from Favourites", "Retirer des favoris", "Aus Favoriten entfernen", "Remover das favoritas"),
+    "Poner la letra a cero": ("Reset Lyrics Timing", "Remettre les paroles à zéro", "Songtextversatz zurücksetzen", "Repor a letra a zero"),
+    "Pone la letra a cero": ("Resets the lyrics timing", "Remet les paroles à zéro", "Setzt den Songtextversatz zurück", "Repõe a letra a zero"),
     "Retrasar la letra": ("Move Lyrics Later", "Retarder les paroles", "Songtext später", "Atrasar a letra"),
     "Retrasar la letra medio segundo": ("Move the lyrics half a second later", "Retarder les paroles d’une demi-seconde", "Songtext eine halbe Sekunde später", "Atrasar a letra meio segundo"),
     "Saltar la cuña de entrada": ("Skip connection ads", "Sauter les pubs de connexion", "Werbung beim Einschalten überspringen", "Saltar os anúncios de entrada"),

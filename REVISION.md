@@ -25,10 +25,15 @@ Comprobado en este Mac:
 - El título ICY llega al reproductor en su punto exacto del audio (−0,008 s medido). El desfase
   de la letra que se nota viene de la emisora, que cambia el título tarde; lo mide Shazam por
   emisora (`title_lag.<stream>`) y, mientras tanto, se corrige a mano con − / + junto a «Letra».
+- Ajuste de la letra a cero: botón ↺ junto a − / +, menú «Poner la letra a cero» (⌥⌘0) y clic en
+  la cifra del widget (el clic en una línea deja cifras como +1,3 s que los pasos de 0,5 no
+  devuelven a cero). Cuando Shazam ha situado una canción en la emisora, el ajuste vuelve a ±0
+  en cada canción nueva y al llegar cada posición de Shazam: el ajuste a mano es de esa canción.
 
 ## Pendiente
 
 ### Por verificar a mano
+- Que el ajuste vuelva a ±0 al cambiar de canción con Shazam activo, y ↺ en ventana y widget.
 - Cuánto se aleja la letra del audio en el widget frente a la ventana: WidgetKit decide cuándo
   pinta cada entrada de la línea de tiempo y puede llegar tarde.
 - Cuña de La Indie cuando rota el anuncio: todos empiezan con la misma sintonía, así que el

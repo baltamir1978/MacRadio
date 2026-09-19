@@ -513,10 +513,13 @@ private struct LyricsAdjuster: View {
                 Image(systemName: "minus").frame(width: 18, height: 16).contentShape(Rectangle())
             }
             .accessibilityLabel(Text("Retrasar la letra"))
-            Text(offsetText)
-                .monospacedDigit()
-                .foregroundStyle(.secondary)
-                .accessibilityLabel(Text("Ajuste de la letra: \(offsetText)"))
+            if offset == 0 {
+                label
+            } else {
+                // Clicking the figure puts it back to ±0, as the ↺ button in the app does.
+                Button(intent: ResetLyricsIntent()) { label }
+                    .accessibilityHint(Text("Pone la letra a cero"))
+            }
             Button(intent: NudgeLyricsIntent(seconds: 0.5)) {
                 Image(systemName: "plus").frame(width: 18, height: 16).contentShape(Rectangle())
             }
@@ -525,6 +528,13 @@ private struct LyricsAdjuster: View {
         .buttonStyle(.plain)
         .font(.system(size: 11, weight: .semibold))
         .foregroundStyle(Color.brand)
+    }
+
+    private var label: some View {
+        Text(offsetText)
+            .monospacedDigit()
+            .foregroundStyle(.secondary)
+            .accessibilityLabel(Text("Ajuste de la letra: \(offsetText)"))
     }
 
     private var offsetText: String {

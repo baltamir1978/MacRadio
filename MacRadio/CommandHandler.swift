@@ -22,6 +22,8 @@ enum CommandHandler {
             player.identifySong()
         case .nudgeLyrics(let seconds):
             player.nudgeLyrics(by: seconds)
+        case .resetLyrics:
+            player.resetLyricsOffset()
         case .syncLyrics(let line, let date):
             player.syncLyrics(toLine: line, clickedAt: date)
         }

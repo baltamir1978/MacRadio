@@ -99,6 +99,9 @@ struct PlaybackCommands: Commands {
             Button("Retrasar la letra") { player.nudgeLyrics(by: -0.5) }
                 .keyboardShortcut(.leftArrow, modifiers: [.option, .command])
                 .disabled(!player.lyricsAreSynced)
+            Button("Poner la letra a cero") { player.resetLyricsOffset() }
+                .keyboardShortcut("0", modifiers: [.option, .command])
+                .disabled(player.lyricsOffset == 0)
             Divider()
             Button(player.isFavorite ? LocalizedStringKey("Quitar de favoritas") : "Marcar como favorita") {
                 player.toggleFavorite()

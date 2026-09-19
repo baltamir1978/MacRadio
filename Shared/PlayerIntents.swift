@@ -126,6 +126,19 @@ struct NudgeLyricsIntent: AppIntent {
     }
 }
 
+/// A click on the widget's «+1,3 s»: the lyrics back to ±0.
+struct ResetLyricsIntent: AppIntent {
+    nonisolated static var title: LocalizedStringResource { "Poner la letra a cero" }
+    nonisolated static var isDiscoverable: Bool { false }
+
+    init() {}
+
+    func perform() async throws -> some IntentResult {
+        await PlayerCommand.resetLyrics.dispatch()
+        return .result()
+    }
+}
+
 /// A click on a lyric line in the widget: that line is the one being sung.
 struct SyncLyricsIntent: AppIntent {
     nonisolated static var title: LocalizedStringResource { "Sincronizar la letra" }

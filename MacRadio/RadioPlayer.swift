@@ -94,11 +94,21 @@ final class RadioPlayer: NSObject, ObservableObject {
     }
 
     func resetLyricsOffset() {
+        zeroLyricsOffset()
+        publishState()
+    }
+
+    /// Back to ±0 without redrawing the widget: callers that move to a new song publish anyway.
+    private func zeroLyricsOffset() {
         guard let station = currentStation else { return }
         lyricsOffset = 0
         UserDefaults.standard.removeObject(forKey: "lyrics_offset." + station.streamURL)
-        publishState()
     }
+
+    /// ShazamKit has placed a song on this station since tuning in. From then on it places each
+    /// song exactly (and learns the station's late titles), so a hand adjustment is only for
+    /// the song it was made on: carried over, it would push the next song off.
+    private var shazamSyncsLyrics = false
 
     /// The current song's entry in the history, if it was recorded (see `HistoryStore.record`).
     @Published private(set) var historyEntryID: UUID?
@@ -255,6 +265,7 @@ final class RadioPlayer: NSObject, ObservableObject {
         sawTitleSinceTuning = false
         stationSendsTitles = false
         missedIdentifications = 0
+        shazamSyncsLyrics = false
         lyricsOffset = UserDefaults.standard.double(forKey: "lyrics_offset." + station.streamURL)
         ShazamService.shared.cancel()
         autoIdentifyTask?.cancel()
@@ -741,6 +752,7 @@ final class RadioPlayer: NSObject, ObservableObject {
             guard key != lastSongKey else { return }
             songIsFromShazam = false
             lastSongKey = key
+            if shazamSyncsLyrics { zeroLyricsOffset() }
 
             // The first title after tuning in belongs to a song already under way; only a title
             // that *changes* while we listen marks the real start of a song. A reconnect
@@ -841,12 +853,15 @@ final class RadioPlayer: NSObject, ObservableObject {
             }
             songStartedAt = start
             songStartIsExact = true
+            shazamSyncsLyrics = true
+            zeroLyricsOffset()
             playbackLog.notice("lyrics synced by ShazamKit at \(offset, privacy: .public)s")
             updateNowPlayingInfo()
             return
         }
         let key = "\(match.artist ?? "")|\(match.title)".lowercased()
-        if key != lastSongKey {
+        let isNewSong = key != lastSongKey
+        if isNewSong {
             lastSongKey = key
             songIsFromShazam = true
             currentTrack = match.title
@@ -866,6 +881,9 @@ final class RadioPlayer: NSObject, ObservableObject {
             let lag = viaDecoder ? bufferedAhead() : 0
             songStartedAt = match.matchedAt.addingTimeInterval(-offset + lag)
             songStartIsExact = true
+            // Matched again every minute on the same song: only a new one starts from ±0.
+            if isNewSong || !shazamSyncsLyrics { zeroLyricsOffset() }
+            shazamSyncsLyrics = true
         }
         updateNowPlayingInfo()
         // Check again in a while: the song will have changed, and the station won't say so.

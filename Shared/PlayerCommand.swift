@@ -12,6 +12,8 @@ nonisolated enum PlayerCommand: Codable, Sendable, Equatable {
     case identify
     /// Lyrics earlier (positive) or later (negative) for the current station.
     case nudgeLyrics(seconds: Double)
+    /// The current station's lyrics back to ±0.
+    case resetLyrics
     /// The user clicked lyric line `line` as it was being sung, at `at`. The time travels with
     /// the command: the app may take a moment to receive it, or even to launch.
     case syncLyrics(line: Int, at: Date)
@@ -142,6 +144,12 @@ extension SharedStore {
             if var s = snapshot, let start = s.songStartedAt, s.songStartIsExact {
                 s.songStartedAt = start.addingTimeInterval(-seconds)
                 s.lyricsOffset = (s.lyricsOffset ?? 0) + seconds
+                snapshot = s
+            }
+        case .resetLyrics:
+            if var s = snapshot, let start = s.songStartedAt, s.songStartIsExact {
+                s.songStartedAt = start.addingTimeInterval(s.lyricsOffset ?? 0)
+                s.lyricsOffset = 0
                 snapshot = s
             }
         case .syncLyrics(let line, let date):

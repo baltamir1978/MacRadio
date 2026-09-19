@@ -271,6 +271,11 @@ private struct SyncAdjuster: View {
             Button { player.nudgeLyrics(by: 0.5) } label: { Image(systemName: "plus") }
                 .help("Adelantar la letra medio segundo")
                 .accessibilityLabel(Text("Adelantar la letra"))
+            // Clicking a line leaves figures like +1.3 s that half-second steps never bring back.
+            Button { player.resetLyricsOffset() } label: { Image(systemName: "arrow.counterclockwise") }
+                .help("Poner la letra a cero")
+                .accessibilityLabel(Text("Poner la letra a cero"))
+                .disabled(player.lyricsOffset == 0)
         }
         .buttonStyle(.borderless)
         .controlSize(.small)
