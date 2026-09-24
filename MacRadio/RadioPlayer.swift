@@ -742,7 +742,7 @@ final class RadioPlayer: NSObject, ObservableObject {
     fileprivate func handleMetadata(_ metadata: [AVMetadataItem], sounding: Date) async {
         for item in metadata {
             guard let raw = try? await item.load(.value), let title = raw as? String else { continue }
-            let cleaned = title.trimmingCharacters(in: .whitespacesAndNewlines)
+            let cleaned = Self.repairingLatin1(title).trimmingCharacters(in: .whitespacesAndNewlines)
             // Some stations (Los 40 Classic) send a bare numeric rotation code instead of a song.
             guard Self.isMeaningfulTitle(cleaned) else { continue }
             // Split on " - " first: a bare "-" would cut band names like "M-Clan" in two.
@@ -833,6 +833,18 @@ final class RadioPlayer: NSObject, ObservableObject {
         }
     }
 
+    /// A station sending Latin-1 ("El Último" with a lone 0xDA byte) can have its title guessed
+    /// as Windows-1256 by AVFoundation, which turns "Ú" into "ع". Arabic in a title is taken for
+    /// that mistake: back to the original bytes and read them as Windows-1252.
+    static func repairingLatin1(_ title: String) -> String {
+        guard title.unicodeScalars.contains(where: { (0x0600...0x06FF).contains($0.value) }) else { return title }
+        let arabic = String.Encoding(rawValue: CFStringConvertEncodingToNSStringEncoding(
+            CFStringEncoding(CFStringEncodings.windowsArabic.rawValue)))
+        guard let bytes = title.data(using: arabic),
+              let latin = String(data: bytes, encoding: .windowsCP1252) else { return title }
+        return latin
+    }
+
     private static func isMeaningfulTitle(_ s: String) -> Bool {
         !s.isEmpty && s.unicodeScalars.contains { CharacterSet.letters.contains($0) }
     }
@@ -844,6 +856,12 @@ final class RadioPlayer: NSObject, ObservableObject {
         let stationKey = compact(station)
         guard !stationKey.isEmpty else { return false }
         return [track, artist].compactMap { $0 }.contains { compact($0) == stationKey }
+    }
+
+    /// `compact` for artist names, blind to how a band's "and" is spelt: iTunes has
+    /// "Fito y Fitipaldis" where the station sends "Fito & Fitipaldis".
+    private static func artistKey(_ s: String) -> String {
+        LyricsService.artistNames(s).map(compact).joined()
     }
 
     private static func compact(_ s: String) -> String {
@@ -1072,8 +1090,8 @@ final class RadioPlayer: NSObject, ObservableObject {
     /// artist is what we took for the song, the pair was the wrong way round.
     private func correctSwappedOrder(using resolved: ResolvedArtwork) {
         guard let track = currentTrack, let artist = currentArtist,
-              let itunesArtist = resolved.artist.map(Self.compact), !itunesArtist.isEmpty else { return }
-        let asTrack = Self.compact(track), asArtist = Self.compact(artist)
+              let itunesArtist = resolved.artist.map(Self.artistKey), !itunesArtist.isEmpty else { return }
+        let asTrack = Self.artistKey(track), asArtist = Self.artistKey(artist)
         guard asTrack == itunesArtist || (asTrack.contains(itunesArtist) && !asArtist.contains(itunesArtist)) else { return }
         playbackLog.notice("station sends title and artist swapped — correcting \(track, privacy: .public)")
         currentTrack = artist
@@ -1217,7 +1235,8 @@ final class RadioPlayer: NSObject, ObservableObject {
         guard !lyricsLookupsInFlight.contains(key) else { return }
         lyricsLookupsInFlight.insert(key)
         Task { @MainActor [weak self] in
-            for wait in [3, 10, 0] {
+            // LRCLIB answers 503 for a while when it's overloaded: keep trying through the song.
+            for wait in [3, 10, 30, 60, 90, 0] {
                 let outcome = await LyricsService.lookup(track: track, artist: artist)
                 guard let self else { return }
                 switch outcome {
