@@ -30,31 +30,26 @@ struct RadioProvider: AppIntentTimelineProvider {
 
     func timeline(for configuration: SelectStationsIntent, in context: Context) async -> Timeline<RadioEntry> {
         // No refresh policy of our own: the app reloads the widget whenever the song, station
-        // or play state changes. Only the lyrics move by the clock, and those are in the entries.
+        // or play state changes, and when the lyric lines in these entries run out.
         Timeline(entries: entries(for: configuration), policy: .never)
     }
 
-    /// One entry for right now, plus one per synced lyric line still to come, so the lyrics
-    /// window steps along with the song without the app having to wake the widget.
+    /// One entry for right now, plus one per synced lyric line coming up, so the lyrics window
+    /// steps along with the song. Only the next few lines: the app reloads for the rest.
     private func entries(for configuration: SelectStationsIntent) -> [RadioEntry] {
         let snapshot = SharedStore.loadNowPlaying()
         let stations = resolve(configuration)
         let now = Date()
 
-        guard let snapshot, snapshot.isPlaying,
-              let start = snapshot.songStartedAt, snapshot.songStartIsExact,
-              let synced = snapshot.lyrics?.synced, !synced.isEmpty else {
+        guard let snapshot, snapshot.isPlaying, snapshot.songStartIsExact,
+              let start = snapshot.songStartedAt, let lyrics = snapshot.lyrics else {
             return [RadioEntry(date: now, snapshot: snapshot, stations: stations, lyricIndex: nil)]
         }
 
         var entries = [RadioEntry(date: now, snapshot: snapshot, stations: stations,
-                                  lyricIndex: snapshot.lyrics?.lineIndex(at: now.timeIntervalSince(start)))]
-        for (index, line) in synced.enumerated() {
-            let date = start.addingTimeInterval(line.time)
-            guard date > now else { continue }
+                                  lyricIndex: lyrics.lineIndex(at: now.timeIntervalSince(start)))]
+        for (index, date) in snapshot.upcomingLyricLines(after: now).prefix(NowPlayingSnapshot.widgetLyricSteps) {
             entries.append(RadioEntry(date: date, snapshot: snapshot, stations: stations, lyricIndex: index))
-            // A song has well under this many lines; the cap only guards against a broken file.
-            if entries.count >= 150 { break }
         }
         return entries
     }

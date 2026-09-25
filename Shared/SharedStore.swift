@@ -187,6 +187,28 @@ nonisolated struct NowPlayingSnapshot: Codable, Sendable, Equatable {
     var lyricsOffset: Double? = nil
 
     var hasSong: Bool { !(track ?? "").isEmpty }
+
+    /// How many lyric lines ahead one widget timeline covers. Each entry is archived as a whole
+    /// view, logos and all (~300 KB), and the system throws away a timeline over ~10 MB, leaving
+    /// the widget blank: a song with its 40 lines to come already failed. The app reloads the
+    /// widget when this window runs out (`lyricWindowEnd`).
+    static let widgetLyricSteps = 11
+
+    /// When each synced line still to come after `now` starts, if the lyrics follow the song.
+    func upcomingLyricLines(after now: Date) -> [(index: Int, date: Date)] {
+        guard isPlaying, songStartIsExact, let start = songStartedAt, let synced = lyrics?.synced else { return [] }
+        return synced.enumerated().compactMap { index, line in
+            let date = start.addingTimeInterval(line.time)
+            return date > now ? (index, date) : nil
+        }
+    }
+
+    /// When the widget's timeline, built at `now`, runs out of lyric lines while the song still
+    /// has more; nil when it covers the rest of the song.
+    func lyricWindowEnd(after now: Date) -> Date? {
+        let upcoming = upcomingLyricLines(after: now)
+        return upcoming.count > Self.widgetLyricSteps ? upcoming[Self.widgetLyricSteps - 1].date : nil
+    }
 }
 
 /// One of the user's stations, as the widget offers it.

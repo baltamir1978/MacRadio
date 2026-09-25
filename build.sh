@@ -31,14 +31,23 @@ if [[ "${1:-}" == "--install" ]]; then
     sleep 1
     rm -rf /Applications/MacRadio.app
     ditto "$APP" /Applications/MacRadio.app
-    # Que el sistema no ofrezca el widget de una copia de compilación: solo el instalado.
+    # Que el sistema no lance el widget de una copia de compilación: solo el instalado. Quitarla
+    # del registro no basta, porque Spotlight o Xcode la vuelven a registrar, y el widget lanzado
+    # desde ella muere al arrancar («Invalid bundle record for current process») y se queda en
+    # blanco. Así que, una vez instalada, se borra.
     for copy in build/dd/Build/Products/*/MacRadio.app; do
         "$LSREGISTER" -u "$copy" 2>/dev/null || true
+        rm -rf "$copy"
     done
     "$LSREGISTER" -f /Applications/MacRadio.app
     # La extensión del widget sigue corriendo con el binario viejo hasta que alguien la para; al
     # pararla, el sistema la vuelve a lanzar ya con el nuevo.
     pkill -f "MacRadio.app/Contents/PlugIns/MacRadioWidget.appex" 2>/dev/null || true
+    # Si chronod llegó a lanzar el widget desde una copia de compilación, launchd le deja el
+    # servicio atado a esa ruta («Attempt to re-bootstrap service from different path, will use
+    # existing») y sigue lanzándola aunque ya no exista: el widget se queda en blanco o sin
+    # actualizarse hasta que chronod se reinicia. Lo relanza el sistema.
+    killall chronod 2>/dev/null || true
     open /Applications/MacRadio.app
     echo "✓ Instalada en /Applications"
 fi

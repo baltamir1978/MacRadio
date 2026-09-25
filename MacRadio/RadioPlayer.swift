@@ -171,6 +171,8 @@ final class RadioPlayer: NSObject, ObservableObject {
     private var widgetArtworkIsCover = false
     private var lastPublished: NowPlayingSnapshot?
     private var hasPublishedOnce = false
+    /// Reloads the widget when the lyric lines in its timeline run out.
+    private var widgetLyricsRefresh: Task<Void, Never>?
 
     // MARK: Cover and lyrics lookups
     /// "artist|title" of the song on screen, so repeated ICY frames don't re-fetch.
@@ -1359,6 +1361,21 @@ final class RadioPlayer: NSObject, ObservableObject {
         hasPublishedOnce = true
         lastPublished = snapshot
         SharedStore.saveNowPlaying(snapshot)
+        scheduleWidgetLyricsRefresh()
+    }
+
+    /// The widget's timeline holds only the next few lyric lines (a whole song's worth is too
+    /// big for the system to keep), so reload it as it reaches the last of them. Our reloads
+    /// cost nothing while the app runs, and nothing plays without it.
+    private func scheduleWidgetLyricsRefresh() {
+        widgetLyricsRefresh?.cancel()
+        guard let end = lastPublished?.lyricWindowEnd(after: Date()) else { return }
+        widgetLyricsRefresh = Task { [weak self] in
+            try? await Task.sleep(for: .seconds(max(0, end.timeIntervalSinceNow)))
+            guard !Task.isCancelled else { return }
+            SharedStore.reloadWidgets()
+            self?.scheduleWidgetLyricsRefresh()
+        }
     }
 }
 

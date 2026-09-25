@@ -44,6 +44,13 @@ Comprobado en este Mac:
   en blanco y se lee la emisora que ▶︎ volvería a poner; al salir, la app pausa antes para que el
   widget lo sepa. Logos a sangre, sin el marco blanco; los de fondo transparente van enteros con
   un margen, sobre oscuro si son claros (Kiss FM). Dibujado con `--render-widgets` e instalado.
+- Widget en blanco (2026-09-24), dos causas. **Línea de tiempo demasiado grande**: una entrada
+  por línea de letra, a ~270 KB cada una, y el sistema rechaza más de ~10 MB («too large timeline
+  archive»), borra la anterior y no reintenta en una hora. Ahora lleva 11 líneas y la app recarga
+  al acabarse. **Widget lanzado desde `build/`**: launchd deja el servicio de chronod atado a la
+  primera ruta que lanzó («re-bootstrap service from different path, will use existing»), y matar
+  el widget no sirve; `build.sh --install` borra las copias de compilación y reinicia chronod.
+  Comprobado (2026-09-25) con 36 líneas: recargas de 12 entradas, 780 KB en vez de >10 MB.
 
 ## Pendiente
 
